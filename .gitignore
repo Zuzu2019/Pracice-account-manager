@@ -1,0 +1,71 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub-cache/
+.buildlog/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-versions
+.melos_tool/
+
+# Generated plugin registrant
+lib/generated_plugin_registrant.dart
+
+# iOS
+ios/Flutter/Generated.xcconfig
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/GeneratedPluginRegistrant.*
+ios/Pods/
+ios/.symlinks/
+ios/.flutter-plugins
+ios/.flutter-plugins-dependencies
+ios/Runner.xcworkspace/
+ios/Runner/GeneratedPluginRegistrant.*
+
+# Android
+android/.gradle/
+android/.idea/
+android/local.properties
+android/build/
+android/app/build/
+*.iml
+
+# macOS
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/Flutter/ephemeral/
+macos/build/
+
+# Web
+web/generated_plugin_registrant.dart
+
+# Linux
+linux/flutter/
+linux/CMakeFiles/
+linux/build/
+linux/Makefile
+linux/cmake-build-debug/
+
+# Windows
+windows/flutter/
+windows/CMakeFiles/
+windows/build/
+windows/Makefile
+windows/cmake-build-debug/
+
+# Firebase
+*.firebase/
+firebase-debug.log
+
+# Coverage
+coverage/
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.iml
+
+# OS Files
+.DS_Store
+Thumbs.db
