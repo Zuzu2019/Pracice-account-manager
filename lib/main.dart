@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
+import 'package:practice_acount_manager/features/widgets/generals/Drawer.dart';
+// import 'package:practice_acount_manager/features/widgets/generals/button_home.dart';
+import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
+import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,16 +16,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Account Manager',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.indigo,
-        scaffoldBackgroundColor: Colors.white,
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(fontSize: 18, color: Colors.black87),
-        ),
-      ),
-      home: const HomePage(),
+      initialRoute: '/', // Ruta inicial
+      routes: {
+        '/': (context) => const HomePage(),
+        '/users': (context) => const UsersPage(),
+        '/alias': (context) => const AliasPage(),
+        // Agrega más rutas según necesites
+      },
     );
   }
 }
@@ -32,45 +33,39 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Account Manager')),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.indigo),
-              child: Text(
-                'Menú',
-                style: TextStyle(color: Colors.white, fontSize: 24),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.alternate_email),
-              title: const Text('Alias'),
-              onTap: () {
-                // Aquí puedes usar Navigator.push o cambiar la pantalla
-                Navigator.pop(context); // Cierra el drawer
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AliasPage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.people),
-              title: const Text('Users'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const UsersPage()),
-                );
-              },
-            ),
+      appBar: AppBar(
+        title: const Text(
+          'Email',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 26,
+            letterSpacing: 1.2,
+          ),
+        ),
+        backgroundColor: const Color.fromARGB(255, 54, 84, 255),
+        centerTitle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(5),
+            top: Radius.circular(5),
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      drawer: const AppDrawer(),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: const [
+            SearchBarExample(),
+            SizedBox(height: 10),
+            Expanded(child: Center(child: Text(''))),
           ],
         ),
       ),
-      body: const Center(child: Text('Hola', style: TextStyle(fontSize: 24))),
+      bottomNavigationBar: const Footer(),
+      // floatingActionButton: const ButtonHome(),
     );
   }
 }

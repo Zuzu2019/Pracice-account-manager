@@ -1,0 +1,11 @@
+Instalar -------------Para manejar los mensajes emergentes
+//documentación
+https://pub.dev/packages/awesome_dialog
+
+//comando de instalación
+flutter pub add awesome_dialog
+
+//Una vez intalado voy a actualizar las dependecias
+flutter pub get
+
+
