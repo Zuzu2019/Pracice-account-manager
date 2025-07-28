@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
+import 'package:practice_acount_manager/features/auth/presentation/pages/login_page.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
-import 'package:practice_acount_manager/features/widgets/generals/Drawer.dart';
+import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
 // import 'package:practice_acount_manager/features/widgets/generals/button_home.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
@@ -16,11 +17,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/', // Ruta inicial
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/login', // Ruta inicial
       routes: {
         '/': (context) => const HomePage(),
         '/users': (context) => const UsersPage(),
         '/alias': (context) => const AliasPage(),
+        '/login': (context) => const LoginPage(),
         // Agrega más rutas según necesites
       },
     );
@@ -35,11 +38,11 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Email',
+          'Home',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 26,
+            fontSize: 23,
             letterSpacing: 1.2,
           ),
         ),
@@ -58,7 +61,7 @@ class HomePage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: const [
-            SearchBarExample(),
+            //SearchBarExample(),
             SizedBox(height: 10),
             Expanded(child: Center(child: Text(''))),
           ],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/search_table_user.dart';
-import 'package:practice_acount_manager/features/widgets/generals/button_home.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_user_navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
@@ -18,7 +17,7 @@ class UsersPage extends StatelessWidget {
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 26,
+            fontSize: 22,
             letterSpacing: 1.2,
           ),
         ),
@@ -38,16 +37,16 @@ class UsersPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SearchBarExample(),
-            const SizedBox(height: 20),
             const Center(child: ButtonOptions()),
-            
+            const SizedBox(height: 20),
+
+            //const SearchBarExample(),
             SizedBox(width: double.infinity, child: const SearchTableUser()),
           ],
         ),
       ),
       bottomNavigationBar: const Footer(),
-      floatingActionButton: const ButtonHome(),
+      //floatingActionButton: const ButtonHome(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }

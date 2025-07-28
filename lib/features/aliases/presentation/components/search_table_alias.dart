@@ -1,41 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:practice_acount_manager/features/users/data/mock_users.dart';
-import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
-import 'package:practice_acount_manager/features/users/presentation/pages/frm_add_user.dart';
+import 'package:practice_acount_manager/features/aliases/data/mock_aliases.dart';
+import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
+import 'package:practice_acount_manager/features/aliases/presentation/pages/frm_add_aliase.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 
-class SearchTableUser extends StatefulWidget {
-  const SearchTableUser({super.key});
+class SearchTableAliases extends StatefulWidget {
+  const SearchTableAliases({super.key});
 
   @override
-  State<SearchTableUser> createState() => _SearchTableUserState();
+  State<SearchTableAliases> createState() => _SearchTableAliasesState();
 }
 
-class _SearchTableUserState extends State<SearchTableUser> {
-  late final UserDataSource _dataSource;
+class _SearchTableAliasesState extends State<SearchTableAliases> {
+  late final AliasesDataSource _dataSource;
   final TextEditingController _searchCtrl = TextEditingController();
   int _rowsPerPage = 9;
   @override
   void initState() {
     super.initState();
 
-    _dataSource = UserDataSource(
-      users: users,
+    _dataSource = AliasesDataSource(
+      alias: alias,
       onEdit: _onEdit,
       onDelete: _onDelete,
     );
   }
 
-  void _onEdit(User u) {
+  void _onEdit(Aliases u) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AddUserForm(user: u, isEditing: true),
+        builder: (context) => AddAliasForm(alias: u, isEditing: true),
       ),
     );
   }
 
-  void _onDelete(User u) {}
+  void _onDelete(Aliases u) {}
 
   @override
   void dispose() {
@@ -62,7 +62,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
               maxWidth: MediaQuery.of(context).size.width,
             ),
             child: PaginatedDataTable(
-              //header: const Text('Usuarios'),
+              //header: const Text('Aliases'),
               columns: const [
                 DataColumn(
                   label: Row(
@@ -74,7 +74,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
                       ),
                       SizedBox(width: 4),
                       Text(
-                        'Login',
+                        'Local',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Color.fromARGB(255, 0, 3, 208),
@@ -88,94 +88,13 @@ class _SearchTableUserState extends State<SearchTableUser> {
                   label: Row(
                     children: [
                       Icon(
-                        Icons.email,
+                        Icons.cloud,
                         size: 18,
                         color: Color.fromARGB(255, 0, 0, 0),
                       ),
                       SizedBox(width: 4),
                       Text(
-                        'Email',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.file_copy,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Maildir',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.verified_user,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-
-                      Text(
-                        'Identificación',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.group,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Grupo',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.storage,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Quota',
+                        'Remoto',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -206,7 +125,6 @@ class _SearchTableUserState extends State<SearchTableUser> {
                   ),
                 ),
               ],
-
               source: _dataSource,
               rowsPerPage: _rowsPerPage,
               availableRowsPerPage: const [9, 20, 50],
@@ -224,39 +142,36 @@ class _SearchTableUserState extends State<SearchTableUser> {
   }
 }
 
-class UserDataSource extends DataTableSource {
-  final void Function(User) onEdit;
-  final void Function(User) onDelete;
+class AliasesDataSource extends DataTableSource {
+  final void Function(Aliases) onEdit;
+  final void Function(Aliases) onDelete;
 
-  final List<User> _all;
-  List<User> _visible;
+  final List<Aliases> _all;
+  List<Aliases> _visible;
 
-  UserDataSource({
-    required List<User> users,
+  AliasesDataSource({
+    required List<Aliases> alias,
     required this.onEdit,
     required this.onDelete,
-  }) : _all = List<User>.from(users),
-       _visible = List<User>.from(users);
+  }) : _all = List<Aliases>.from(alias),
+       _visible = List<Aliases>.from(alias);
 
   void filter(String query) {
     final q = query.toLowerCase().trim();
     if (q.isEmpty) {
-      _visible = List<User>.from(_all);
+      _visible = List<Aliases>.from(_all);
     } else {
       _visible = _all.where((u) {
-        return u.email.toLowerCase().contains(q) ||
-            u.maildir.toLowerCase().contains(q) ||
-            u.identificacion.toLowerCase().contains(q) ||
-            u.grupo.toLowerCase().contains(q) ||
-            u.quota.toLowerCase().contains(q);
+        return u.remoto.toLowerCase().contains(q) ||
+            u.remoto.toLowerCase().contains(q);
       }).toList();
     }
     notifyListeners();
   }
 
-  void delete(User u) {
-    _all.removeWhere((x) => x.login == u.login);
-    _visible.removeWhere((x) => x.login == u.login);
+  void delete(Aliases u) {
+    _all.removeWhere((x) => x.local == u.local);
+    _visible.removeWhere((x) => x.local == u.local);
     notifyListeners();
   }
 
@@ -273,12 +188,8 @@ class UserDataSource extends DataTableSource {
       index: index,
       color: WidgetStateProperty.all(rowColor),
       cells: [
-        DataCell(Text(u.login)),
-        DataCell(Text(u.email)),
-        DataCell(Text(u.maildir)),
-        DataCell(Text(u.identificacion)),
-        DataCell(Text(u.grupo)),
-        DataCell(Text(u.quota)),
+        DataCell(Text(u.local)),
+        DataCell(Text(u.remoto)),
         DataCell(
           PopupMenuButton<String>(
             onSelected: (value) {

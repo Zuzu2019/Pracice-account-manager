@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:practice_acount_manager/features/aliases/presentation/components/search_table_alias.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_aliase_navigation.dart';
-import 'package:practice_acount_manager/features/widgets/generals/button_home.dart';
+//import 'package:practice_acount_manager/features/widgets/generals/button_home.dart';
 import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
@@ -17,7 +18,7 @@ class AliasPage extends StatelessWidget {
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 26,
+            fontSize: 22,
             letterSpacing: 1.2,
           ),
         ),
@@ -37,14 +38,16 @@ class AliasPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: const [
-            SearchBarExample(),
-            SizedBox(height: 20),
             Center(child: ButtonOptionsAliase()),
+            SizedBox(height: 20),
+
+            //SearchBarExample(),
+            SizedBox(child: SearchTableAliases()),
           ],
         ),
       ),
       bottomNavigationBar: const Footer(),
-      floatingActionButton: const ButtonHome(),
+      //floatingActionButton: const ButtonHome(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }

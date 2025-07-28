@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/frm_add_user.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
 
@@ -30,7 +31,19 @@ class _ButtonOptionsState extends State<ButtonOptions> {
                 });
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const AddUserForm()),
+                  MaterialPageRoute(
+                    builder: (_) => AddUserForm(
+                      user: User(
+                        email: '',
+                        grupo: '',
+                        identificacion: '',
+                        login: '',
+                        maildir: '',
+                        quota: '',
+                      ),
+                      isEditing: false,
+                    ),
+                  ),
                 );
               },
               icon: const Icon(Icons.person_add),
@@ -42,10 +55,10 @@ class _ButtonOptionsState extends State<ButtonOptions> {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
-                  vertical: 12,
+                  vertical: 10,
                 ),
                 textStyle: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -69,10 +82,10 @@ class _ButtonOptionsState extends State<ButtonOptions> {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
-                  vertical: 12,
+                  vertical: 10,
                 ),
                 textStyle: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),

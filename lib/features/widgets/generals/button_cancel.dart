@@ -28,7 +28,7 @@ class ButtonCancel extends StatelessWidget {
       onPressed: () => _showCancelConfirmation(context),
       child: const Text('Cancelar'),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red,
+        backgroundColor: const Color.fromARGB(255, 177, 43, 34),
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
