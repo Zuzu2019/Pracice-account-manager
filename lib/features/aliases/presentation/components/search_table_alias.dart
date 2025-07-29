@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:practice_acount_manager/features/aliases/data/mock_aliases.dart';
 import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/frm_add_aliase.dart';
+import 'package:practice_acount_manager/features/widgets/generals/alert_dialog.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 
 class SearchTableAliases extends StatefulWidget {
@@ -13,8 +14,9 @@ class SearchTableAliases extends StatefulWidget {
 
 class _SearchTableAliasesState extends State<SearchTableAliases> {
   late final AliasesDataSource _dataSource;
+
   final TextEditingController _searchCtrl = TextEditingController();
-  int _rowsPerPage = 9;
+  //int _rowsPerPage = 9;
   @override
   void initState() {
     super.initState();
@@ -35,7 +37,28 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
     );
   }
 
-  void _onDelete(Aliases u) {}
+  void _onDelete(Aliases alias) async {
+    final confirm = await showDialog(
+      context: context,
+      builder: (context) => ConfirmAlertDialog(text: alias.local),
+    );
+
+    if (confirm == true) {
+      setState(() {
+        _dataSource.delete(alias);
+      });
+
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Alias "${alias.local}" eliminado correctamente'),
+          duration: Duration(seconds: 3),
+          backgroundColor: Colors.green,
+          elevation: 5,
+        ),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -45,99 +68,76 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SearchBarExample(
-          onQueryChanged: (query) {
-            _dataSource.filter(query);
-            setState(() {}); // <- Redibuja la tabla con los resultados
-          },
-        ),
-        const SizedBox(height: 16),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minWidth: MediaQuery.of(context).size.width * 0.9,
-              maxWidth: MediaQuery.of(context).size.width,
-            ),
-            child: PaginatedDataTable(
-              //header: const Text('Aliases'),
-              columns: const [
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.person,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Local',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.cloud,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Remoto',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.settings,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Acciones   ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-              source: _dataSource,
-              rowsPerPage: _rowsPerPage,
-              availableRowsPerPage: const [9, 20, 50],
-              onRowsPerPageChanged: (v) {
-                if (v != null) {
-                  setState(() => _rowsPerPage = v);
-                }
-              },
-              showFirstLastButtons: true,
-            ),
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(15),
+      child: Column(
+        children: [
+          SearchBarExample(
+            onQueryChanged: (query) {
+              _dataSource.filter(query);
+              setState(() {});
+            },
           ),
-        ),
-      ],
+          const SizedBox(height: 16),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: _dataSource.visibleCount,
+            itemBuilder: (context, index) {
+              final alias = _dataSource.getVisibleAt(index);
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 1),
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListTile(
+                  leading: const Icon(Icons.person, color: Colors.blue),
+                  title: Text(
+                    'Local: ${alias.local}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  subtitle: Text(
+                    'Remoto: ${alias.remoto}',
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        _onEdit(alias);
+                      } else if (value == 'delete') {
+                        _onDelete(alias);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, color: Colors.blue),
+                            SizedBox(width: 8),
+                            Text('Editar'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text('Eliminar'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -148,6 +148,9 @@ class AliasesDataSource extends DataTableSource {
 
   final List<Aliases> _all;
   List<Aliases> _visible;
+
+  int get visibleCount => _visible.length;
+  Aliases getVisibleAt(int index) => _visible[index];
 
   AliasesDataSource({
     required List<Aliases> alias,

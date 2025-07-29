@@ -4,7 +4,7 @@ import 'package:practice_acount_manager/features/widgets/generals/button_aliase_
 //import 'package:practice_acount_manager/features/widgets/generals/button_home.dart';
 import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
-import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
+//import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 
 class AliasPage extends StatelessWidget {
   const AliasPage({super.key});
