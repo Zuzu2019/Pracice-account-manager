@@ -1,8 +1,8 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:practice_acount_manager/features/users/data/mock_users.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/frm_add_user.dart';
-import 'package:practice_acount_manager/features/widgets/generals/alert_dialog.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 
 class SearchTableUser extends StatefulWidget {
@@ -37,27 +37,54 @@ class _SearchTableUserState extends State<SearchTableUser> {
     );
   }
 
-  void _onDelete(User user) async {
-    final confirm = await showDialog<bool>(
+  void _onDelete(User user) {
+    AwesomeDialog(
       context: context,
-      builder: (context) => ConfirmAlertDialog(text: user.login),
-    );
+      dialogType: DialogType.question,
+      animType: AnimType.bottomSlide,
+      title: 'Eliminar',
+      desc: '¿Estás seguro de eliminar el usuario ${user.login}?',
+      btnCancelText: 'Cancelar',
+      btnCancelOnPress: () {},
+      btnOkText: 'Confirmar',
+      btnOkOnPress: () {
+        setState(() {
+          _dataSource.delete(user);
+        });
 
-    if (confirm == true) {
-      setState(() {
-        _dataSource.delete(user);
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Usuario "${user.login}" eliminado corretamente'),
-          duration: Duration(seconds: 3),
-          backgroundColor: Colors.green,
-          elevation: 5,
-        ),
-      );
-    }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Usuario "${user.login}" eliminado correctamente'),
+            duration: Duration(seconds: 3),
+            backgroundColor: Colors.green,
+            elevation: 5,
+          ),
+        );
+      },
+    ).show();
   }
+
+  //void _onDelete(User user) {
+  // final confirm = await showDialog<bool>(
+  //   context: context,
+  //   builder: (context) => ConfirmAlertDialog(text: user.login),
+  // );
+
+  // if (confirm == true) {
+  //   setState(() {
+  //     _dataSource.delete(user);
+  //   });
+
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       content: Text('Usuario "${user.login}" eliminado corretamente'),
+  //       duration: Duration(seconds: 3),
+  //       backgroundColor: Colors.green,
+  //       elevation: 5,
+  //     ),
+  //   );
+  // }
+  //}
 
   // void _onDelete(User u) {
   //   users.remove(u);

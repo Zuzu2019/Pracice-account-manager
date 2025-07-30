@@ -1,8 +1,8 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:practice_acount_manager/features/aliases/data/mock_aliases.dart';
 import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/frm_add_aliase.dart';
-import 'package:practice_acount_manager/features/widgets/generals/alert_dialog.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 
 class SearchTableAliases extends StatefulWidget {
@@ -37,28 +37,55 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
     );
   }
 
-  void _onDelete(Aliases alias) async {
-    final confirm = await showDialog(
+  void _onDelete(Aliases alias) {
+    AwesomeDialog(
       context: context,
-      builder: (context) => ConfirmAlertDialog(text: alias.local),
-    );
+      dialogType: DialogType.question,
+      animType: AnimType.bottomSlide,
+      title: 'Eliminar',
+      desc: '¿Estás seguro de eliminar a ${alias.local}?',
+      btnCancelText: 'Cancelar',
+      btnCancelOnPress: () {},
+      btnOkText: 'Confirmar',
+      btnOkOnPress: () {
+        setState(() {
+          _dataSource.delete(alias);
+        });
 
-    if (confirm == true) {
-      setState(() {
-        _dataSource.delete(alias);
-      });
-
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Alias "${alias.local}" eliminado correctamente'),
-          duration: Duration(seconds: 3),
-          backgroundColor: Colors.green,
-          elevation: 5,
-        ),
-      );
-    }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Usuario "${alias.local}" eliminado correctamente'),
+            duration: Duration(seconds: 3),
+            backgroundColor: Colors.green,
+            elevation: 5,
+          ),
+        );
+      },
+    ).show();
   }
+
+  // void _onDelete(Aliases alias) async {
+  //   final confirm = await showDialog(
+  //     context: context,
+  //     builder: (context) => ConfirmAlertDialog(text: alias.local),
+  //   );
+
+  //   if (confirm == true) {
+  //     setState(() {
+  //       _dataSource.delete(alias);
+  //     });
+
+  //     // ignore: use_build_context_synchronously
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Alias "${alias.local}" eliminado correctamente'),
+  //         duration: Duration(seconds: 3),
+  //         backgroundColor: Colors.green,
+  //         elevation: 5,
+  //       ),
+  //     );
+  //   }
+  // }
 
   @override
   void dispose() {
