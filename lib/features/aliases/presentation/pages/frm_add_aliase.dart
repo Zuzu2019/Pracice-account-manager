@@ -1,36 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_aliase_navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_cancel.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
 
 class AddAliasForm extends StatefulWidget {
-  const AddAliasForm({super.key});
+  final Aliases alias;
+  final bool isEditing;
 
+  const AddAliasForm({super.key, required this.alias, this.isEditing = false});
   @override
   State<AddAliasForm> createState() => _AddAliasFormState();
 }
 
 class _AddAliasFormState extends State<AddAliasForm> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _localController = TextEditingController();
-  final TextEditingController _remotoController = TextEditingController();
+  //final TextEditingController _localController = TextEditingController();
+  //final TextEditingController _remotoController = TextEditingController();
+
+  late final TextEditingController _localController;
+  late final TextEditingController _remotoController;
+
+  void initState() {
+    super.initState();
+    _localController = TextEditingController(text: widget.alias.local);
+    _remotoController = TextEditingController(text: widget.alias.remoto);
+  }
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.success,
-        animType: AnimType.rightSlide,
-        title: 'Éxito',
-        desc: 'Alias agregado correctamente.',
-        btnOkOnPress: () {
-          _formKey.currentState!.reset();
-          _localController.clear();
-          _remotoController.clear();
-        },
-        btnOkColor: Colors.green,
-      ).show();
+      final updateAliases = Aliases(
+        local: _localController.text.trim(),
+        remoto: _remotoController.text.trim(),
+      );
+
+      if (widget.isEditing) {
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.info,
+          animType: AnimType.rightSlide,
+          title: 'Alias actualizado',
+          desc: 'Los datos del alias fueron modificados correctamente.',
+          btnOkOnPress: () {
+            Navigator.pop(context, updateAliases); // devolver alias editado
+          },
+          btnOkColor: Colors.blue,
+        ).show();
+      } else {
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.success,
+          animType: AnimType.rightSlide,
+          title: 'Éxito',
+          desc: 'Alias agregado correctamente.',
+          btnOkOnPress: () {
+            _formKey.currentState!.reset();
+            _localController.clear();
+            _remotoController.clear();
+          },
+          btnOkColor: Colors.green,
+        ).show();
+      }
     }
   }
 
@@ -43,14 +74,17 @@ class _AddAliasFormState extends State<AddAliasForm> {
 
   @override
   Widget build(BuildContext context) {
+    final title = widget.isEditing ? 'Editar alias' : 'Agregar alias';
+    final btnText = widget.isEditing ? 'Actualizar' : 'Agregar';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Agregar Aliases',
+        title: Text(
+          title,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 26,
+            fontSize: 22,
             letterSpacing: 1.2,
           ),
         ),
@@ -71,18 +105,18 @@ class _AddAliasFormState extends State<AddAliasForm> {
           children: [
             const ButtonOptionsAliase(),
             const SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.alternate_email, size: 30),
-                SizedBox(width: 10),
-                Text(
-                  'Nuevo Aliases',
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: const [
+            //     Icon(Icons.alternate_email, size: 30),
+            //     SizedBox(width: 10),
+            //     Text(
+            //       'Aliases',
+            //       style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            //       textAlign: TextAlign.center,
+            //     ),
+            //   ],
+            // ),
             const SizedBox(height: 16),
             Card(
               elevation: 5,
@@ -152,7 +186,7 @@ class _AddAliasFormState extends State<AddAliasForm> {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _remotoController,
-                        minLines: 3,
+                        //minLines: 3,
                         maxLines: null,
                         keyboardType: TextInputType.multiline,
                         decoration: InputDecoration(
@@ -212,9 +246,9 @@ class _AddAliasFormState extends State<AddAliasForm> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color.fromARGB(
                                 255,
-                                0,
-                                167,
-                                17,
+                                39,
+                                122,
+                                47,
                               ),
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(
@@ -225,7 +259,7 @@ class _AddAliasFormState extends State<AddAliasForm> {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                             ),
-                            child: const Text('Agregar Aliases'),
+                            child: Text(btnText),
                           ),
                           const SizedBox(width: 16),
                           const ButtonCancel(),

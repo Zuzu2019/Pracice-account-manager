@@ -1,5 +1,9 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:practice_acount_manager/features/users/data/mock_users.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
+import 'package:practice_acount_manager/features/users/presentation/pages/frm_add_user.dart';
+import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 
 class SearchTableUser extends StatefulWidget {
   const SearchTableUser({super.key});
@@ -11,29 +15,11 @@ class SearchTableUser extends StatefulWidget {
 class _SearchTableUserState extends State<SearchTableUser> {
   late final UserDataSource _dataSource;
   final TextEditingController _searchCtrl = TextEditingController();
-  int _rowsPerPage = 7;
+  //int _rowsPerPage = 9;
+
   @override
   void initState() {
     super.initState();
-
-    final users = [
-      User(
-        login: 'jsanchez',
-        email: 'jsanchez@example.com',
-        maildir: '/home/jsanchez/mail',
-        identificacion: '123456789',
-        grupo: 'admin',
-        quota: '500MB',
-      ),
-      User(
-        login: 'jsanchez',
-        email: 'jsanchez@example.com',
-        maildir: '/home/jsanchez/mail',
-        identificacion: '123456789',
-        grupo: 'admin',
-        quota: '500MB',
-      ),
-    ];
 
     _dataSource = UserDataSource(
       users: users,
@@ -42,9 +28,67 @@ class _SearchTableUserState extends State<SearchTableUser> {
     );
   }
 
-  void _onEdit(User u) {}
+  void _onEdit(User u) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddUserForm(user: u, isEditing: true),
+      ),
+    );
+  }
 
-  void _onDelete(User u) {}
+  void _onDelete(User user) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.question,
+      animType: AnimType.bottomSlide,
+      title: 'Eliminar',
+      desc: '¿Estás seguro de eliminar el usuario ${user.login}?',
+      btnCancelText: 'Cancelar',
+      btnCancelOnPress: () {},
+      btnOkText: 'Confirmar',
+      btnOkOnPress: () {
+        setState(() {
+          _dataSource.delete(user);
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Usuario "${user.login}" eliminado correctamente'),
+            duration: Duration(seconds: 3),
+            backgroundColor: Colors.green,
+            elevation: 5,
+          ),
+        );
+      },
+    ).show();
+  }
+
+  //void _onDelete(User user) {
+  // final confirm = await showDialog<bool>(
+  //   context: context,
+  //   builder: (context) => ConfirmAlertDialog(text: user.login),
+  // );
+
+  // if (confirm == true) {
+  //   setState(() {
+  //     _dataSource.delete(user);
+  //   });
+
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       content: Text('Usuario "${user.login}" eliminado corretamente'),
+  //       duration: Duration(seconds: 3),
+  //       backgroundColor: Colors.green,
+  //       elevation: 5,
+  //     ),
+  //   );
+  // }
+  //}
+
+  // void _onDelete(User u) {
+  //   users.remove(u);
+  // }
 
   @override
   void dispose() {
@@ -54,175 +98,186 @@ class _SearchTableUserState extends State<SearchTableUser> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 16),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minWidth: MediaQuery.of(context).size.width * 0.9,
-              maxWidth: MediaQuery.of(context).size.width,
-            ),
-            child: PaginatedDataTable(
-              header: const Text('Dashboard Usuarios'),
-              columns: const [
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.person,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Login',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.email,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Email',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.file_copy,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Maildir',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.verified_user,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-
-                      Text(
-                        'Identificación',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.group,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Grupo',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.storage,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Quota',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                DataColumn(
-                  label: Row(
-                    children: [
-                      Icon(
-                        Icons.settings,
-                        size: 18,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Acciones   ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 0, 3, 208),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-
-              source: _dataSource,
-              rowsPerPage: _rowsPerPage,
-              availableRowsPerPage: const [7, 10, 20, 50],
-              onRowsPerPageChanged: (v) {
-                if (v != null) {
-                  setState(() => _rowsPerPage = v);
-                }
-              },
-              showFirstLastButtons: true,
-            ),
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(10),
+      child: Column(
+        children: [
+          SearchBarExample(
+            onQueryChanged: (query) {
+              _dataSource.filter(query);
+              setState(() {});
+            },
           ),
-        ),
-      ],
+          const SizedBox(height: 16),
+
+          ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: _dataSource.visibleCount,
+            itemBuilder: (context, index) {
+              final user = _dataSource.getVisibleAt(index);
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 1),
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(width: 10),
+                      // Info en dos columnas
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Imagen circular (avatar) con imagen local
+                                  const CircleAvatar(
+                                    radius: 40,
+                                    backgroundImage: NetworkImage(
+                                      'https://st4.depositphotos.com/11574170/25191/v/450/depositphotos_251916955-stock-illustration-user-glyph-color-icon.jpg',
+                                    ),
+                                    backgroundColor: Colors.grey,
+                                  ),
+                                  SizedBox(height: 10),
+                                  const Text(
+                                    'Login',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    user.login,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    'Email',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    user.email,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 30),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Maildir',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    user.maildir,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  const Text(
+                                    'Identificación',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    user.identificacion,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    'Grupo',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    user.grupo,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    'Quota',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    user.quota,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Botón de opciones
+                      PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            _onEdit(user);
+                          } else if (value == 'delete') {
+                            _onDelete(user);
+                            //_dataSource.delete(user);
+                            //setState(() {});
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit, color: Colors.blue),
+                                SizedBox(width: 8),
+                                Text('Editar'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, color: Colors.red),
+                                SizedBox(width: 8),
+                                Text('Eliminar'),
+                              ],
+                            ),
+                          ),
+                        ],
+                        icon: const Icon(Icons.more_vert),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -233,6 +288,9 @@ class UserDataSource extends DataTableSource {
 
   final List<User> _all;
   List<User> _visible;
+
+  int get visibleCount => _visible.length;
+  User getVisibleAt(int index) => _visible[index];
 
   UserDataSource({
     required List<User> users,
@@ -269,8 +327,8 @@ class UserDataSource extends DataTableSource {
     final u = _visible[index];
 
     final rowColor = index % 2 == 0
-        ? const Color(0xFFE3F2FD) 
-        : const Color(0xFFBBDEFB); 
+        ? const Color(0xFFE3F2FD)
+        : const Color(0xFFBBDEFB);
 
     return DataRow.byIndex(
       index: index,

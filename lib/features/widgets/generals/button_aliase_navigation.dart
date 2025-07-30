@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/frm_add_aliase.dart';
 
@@ -30,7 +31,12 @@ class _ButtonOptionsAliaseState extends State<ButtonOptionsAliase> {
                 });
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const AddAliasForm()),
+                  MaterialPageRoute(
+                    builder: (_) => AddAliasForm(
+                      alias: Aliases(local: '', remoto: ''),
+                      isEditing: false,
+                    ),
+                  ),
                 );
               },
               icon: const Icon(Icons.person_add),
@@ -41,11 +47,11 @@ class _ButtonOptionsAliaseState extends State<ButtonOptionsAliase> {
                     : const Color.fromARGB(255, 7, 156, 255),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
+                  horizontal: 25,
+                  vertical: 10,
                 ),
                 textStyle: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -68,11 +74,11 @@ class _ButtonOptionsAliaseState extends State<ButtonOptionsAliase> {
                     : const Color.fromARGB(255, 7, 156, 255),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
+                  horizontal: 26,
+                  vertical: 10,
                 ),
                 textStyle: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
