@@ -69,7 +69,7 @@ class _PasswordFieldState extends State<PasswordField> {
         if (widget.edit == true) {
           return null; // No validation needed for editing
         } else {
-          value == null || value.isEmpty ? 'Campo obligatorio' : null;
+          return value == null || value.isEmpty ? 'Campo obligatorio' : null;
         }
       },
     );
