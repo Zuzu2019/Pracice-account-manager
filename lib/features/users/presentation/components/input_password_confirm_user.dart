@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class ConfirmPasswordField extends StatefulWidget {
   final TextEditingController controller;
   final TextEditingController originalPasswordController;
+  final bool edit;
 
   const ConfirmPasswordField({
     super.key,
     required this.controller,
     required this.originalPasswordController,
+    required this.edit,
   });
 
   @override
@@ -70,12 +72,16 @@ class _ConfirmPasswordFieldState extends State<ConfirmPasswordField> {
         ),
       ),
       validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Campo obligatorio';
+        if (widget.edit == false) {
+          if (value == null || value.isEmpty) {
+            return 'Campo obligatorio';
+          } // No validation needed for editing
         }
+
         if (value != widget.originalPasswordController.text) {
           return 'Las contraseñas no coinciden';
         }
+
         return null;
       },
     );

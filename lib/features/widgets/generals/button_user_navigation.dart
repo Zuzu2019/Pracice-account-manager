@@ -31,19 +31,7 @@ class _ButtonOptionsState extends State<ButtonOptions> {
                 });
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => AddUserForm(
-                      user: User(
-                        email: '',
-                        grupo: '',
-                        identificacion: '',
-                        login: '',
-                        maildir: '',
-                        quota: '',
-                      ),
-                      isEditing: false,
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (_) => AddUserForm()),
                 );
               },
               icon: const Icon(Icons.person_add),

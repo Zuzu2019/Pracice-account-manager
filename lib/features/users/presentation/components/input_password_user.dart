@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class PasswordField extends StatefulWidget {
   final TextEditingController controller;
+  final bool edit;
 
-  const PasswordField({super.key, required this.controller});
+  const PasswordField({super.key, required this.controller, this.edit = false});
 
   @override
   State<PasswordField> createState() => _PasswordFieldState();
@@ -64,8 +65,13 @@ class _PasswordFieldState extends State<PasswordField> {
           borderSide: const BorderSide(color: Colors.red, width: 2),
         ),
       ),
-      validator: (value) =>
-          value == null || value.isEmpty ? 'Campo obligatorio' : null,
+      validator: (value) {
+        if (widget.edit == true) {
+          return null; // No validation needed for editing
+        } else {
+          return value == null || value.isEmpty ? 'Campo obligatorio' : null;
+        }
+      },
     );
   }
 }

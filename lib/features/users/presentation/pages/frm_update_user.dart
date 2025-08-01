@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_confirm_user.dart';
+import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_cancel.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_user_navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_user.dart';
 
-class AddUserForm extends StatefulWidget {
-  const AddUserForm({super.key});
+class UpdateUserForm extends StatefulWidget {
+  final User user;
+
+  const UpdateUserForm({super.key, required this.user});
 
   @override
-  State<AddUserForm> createState() => _AddUserFormState();
+  State<UpdateUserForm> createState() => _AddUserFormState();
 }
 
-class _AddUserFormState extends State<AddUserForm> {
+class _AddUserFormState extends State<UpdateUserForm> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -31,12 +34,14 @@ class _AddUserFormState extends State<AddUserForm> {
   void initState() {
     super.initState();
 
-    // Nueva inserción: campos vacíos
-    _loginController = TextEditingController();
-    _idController = TextEditingController();
-    _groupController = TextEditingController();
-    _quotaController = TextEditingController();
-    _dominioController = TextEditingController();
+    final email = widget.user.email;
+    final dominio = email.contains('@') ? email.split('@')[1] : '';
+
+    _loginController = TextEditingController(text: widget.user.login);
+    _idController = TextEditingController(text: widget.user.identificacion);
+    _groupController = TextEditingController(text: widget.user.grupo);
+    _quotaController = TextEditingController(text: widget.user.quota);
+    _dominioController = TextEditingController(text: dominio);
   }
 
   void _submitForm() {
@@ -55,17 +60,11 @@ class _AddUserFormState extends State<AddUserForm> {
       AwesomeDialog(
         context: context,
         dialogType: DialogType.success,
-        title: 'Éxito',
-        desc: 'Usuario agregado correctamente',
+        animType: AnimType.rightSlide,
+        title: 'User actualizado',
+        desc: 'Usuario actualizado correctamente',
         btnOkOnPress: () {
-          _formKey.currentState!.reset();
-          _loginController.clear();
-          _passwordController.clear();
-          _confirmPasswordController.clear();
-          _idController.clear();
-          _groupController.clear();
-          _quotaController.clear();
-          setState(() => _selectedDomain = null);
+          Navigator.pop(context, '');
         },
         btnOkColor: Colors.green,
       ).show();
@@ -85,8 +84,8 @@ class _AddUserFormState extends State<AddUserForm> {
 
   @override
   Widget build(BuildContext context) {
-    final title = 'Agregar usuario';
-    final btnText = 'Agregar';
+    final title = 'Editar usuario';
+    final btnText = 'Actualizar';
 
     return Scaffold(
       appBar: AppBar(
@@ -187,13 +186,13 @@ class _AddUserFormState extends State<AddUserForm> {
 
                       PasswordField(
                         controller: _passwordController,
-                        edit: false,
+                        edit: true,
                       ),
                       const SizedBox(height: 16),
                       ConfirmPasswordField(
                         controller: _confirmPasswordController,
                         originalPasswordController: _passwordController,
-                        edit: false,
+                        edit: true,
                       ),
                       const SizedBox(height: 16),
 
