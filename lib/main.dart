@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
-import 'package:practice_acount_manager/features/auth/presentation/pages/login_page.dart';
+import 'package:practice_acount_manager/features/auth/presentation/pages/login_page_local.dart';
+import 'package:practice_acount_manager/features/auth/presentation/pages/select_login_page.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
 import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
@@ -16,12 +17,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/login', // Ruta inicial
+      initialRoute: '/select_login', // Ruta inicial
       routes: {
         '/': (context) => const HomePage(),
         '/users': (context) => const UsersPage(),
         '/alias': (context) => const AliasPage(),
         '/login': (context) => const LoginPage(),
+        '/select_login': (context) => const SelectLoginPage(),
         // Agrega más rutas según necesites
       },
     );
