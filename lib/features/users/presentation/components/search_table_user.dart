@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:practice_acount_manager/features/users/data/mock_users.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/frm_add_user.dart';
+import 'package:practice_acount_manager/features/users/presentation/pages/frm_update_user.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 
 class SearchTableUser extends StatefulWidget {
@@ -31,9 +32,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
   void _onEdit(User u) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => AddUserForm(user: u, isEditing: true),
-      ),
+      MaterialPageRoute(builder: (context) => UpdateUserForm(user: u)),
     );
   }
 

@@ -3,9 +3,7 @@ import 'package:practice_acount_manager/features/aliases/presentation/pages/alia
 import 'package:practice_acount_manager/features/auth/presentation/pages/login_page.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
 import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
-// import 'package:practice_acount_manager/features/widgets/generals/button_home.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
-import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 
 void main() {
   runApp(const MyApp());
