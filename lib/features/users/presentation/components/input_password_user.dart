@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 class PasswordField extends StatefulWidget {
   final TextEditingController controller;
@@ -21,16 +22,18 @@ class _PasswordFieldState extends State<PasswordField> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return TextFormField(
       controller: widget.controller,
       obscureText: _obscure,
       decoration: InputDecoration(
-        labelText: 'Contraseña',
+        labelText: loc.label_password,
         labelStyle: const TextStyle(
           color: Color.fromARGB(255, 25, 0, 255),
           fontWeight: FontWeight.bold,
         ),
-        hintText: 'Escribe tu contraseña',
+        hintText: loc.hint_password,
         hintStyle: const TextStyle(color: Colors.grey),
         prefixIcon: const Icon(Icons.lock, color: Color.fromARGB(255, 0, 0, 0)),
         suffixIcon: IconButton(
@@ -69,7 +72,7 @@ class _PasswordFieldState extends State<PasswordField> {
         if (widget.edit == true) {
           return null; // No validation needed for editing
         } else {
-          return value == null || value.isEmpty ? 'Campo obligatorio' : null;
+          return value == null || value.isEmpty ? loc.field_required : null;
         }
       },
     );

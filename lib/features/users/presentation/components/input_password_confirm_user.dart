@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 class ConfirmPasswordField extends StatefulWidget {
   final TextEditingController controller;
@@ -27,16 +28,18 @@ class _ConfirmPasswordFieldState extends State<ConfirmPasswordField> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return TextFormField(
       controller: widget.controller,
       obscureText: _obscure,
       decoration: InputDecoration(
-        labelText: 'Confirmar contraseña',
+        labelText: loc.label_confirm_password,
         labelStyle: const TextStyle(
           color: Color.fromARGB(255, 25, 0, 255),
           fontWeight: FontWeight.bold,
         ),
-        hintText: 'Repite tu contraseña',
+        hintText: loc.confirm_password_hint,
         hintStyle: const TextStyle(color: Colors.grey),
         prefixIcon: const Icon(Icons.lock, color: Color.fromARGB(255, 0, 0, 0)),
         suffixIcon: IconButton(
@@ -74,12 +77,12 @@ class _ConfirmPasswordFieldState extends State<ConfirmPasswordField> {
       validator: (value) {
         if (widget.edit == false) {
           if (value == null || value.isEmpty) {
-            return 'Campo obligatorio';
+            return loc.field_required;
           } // No validation needed for editing
         }
 
         if (value != widget.originalPasswordController.text) {
-          return 'Las contraseñas no coinciden';
+          return loc.password_mismatch;
         }
 
         return null;

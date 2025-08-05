@@ -6,6 +6,7 @@ import 'package:practice_acount_manager/features/widgets/generals/button_cancel.
 import 'package:practice_acount_manager/features/widgets/generals/button_user_navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_user.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 class UpdateUserForm extends StatefulWidget {
   final User user;
@@ -29,6 +30,8 @@ class _AddUserFormState extends State<UpdateUserForm> {
 
   String? _selectedDomain;
   String? dominio;
+
+  get onLocaleChange => null;
 
   @override
   void initState() {
@@ -84,8 +87,9 @@ class _AddUserFormState extends State<UpdateUserForm> {
 
   @override
   Widget build(BuildContext context) {
-    final title = 'Editar usuario';
-    final btnText = 'Actualizar';
+    final loc = AppLocalizations.of(context)!;
+    final title = loc.edit_user_title;
+    final btnText = loc.update_button;
 
     return Scaffold(
       appBar: AppBar(
@@ -113,7 +117,7 @@ class _AddUserFormState extends State<UpdateUserForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const ButtonOptions(),
+            ButtonOptions(),
             const SizedBox(height: 30),
             const SizedBox(height: 16),
 
@@ -135,12 +139,12 @@ class _AddUserFormState extends State<UpdateUserForm> {
                       TextFormField(
                         controller: _loginController,
                         decoration: InputDecoration(
-                          labelText: 'Login',
+                          labelText: loc.label_login,
                           labelStyle: const TextStyle(
                             color: Color.fromARGB(255, 25, 0, 255),
                             fontWeight: FontWeight.bold,
                           ),
-                          hintText: 'Escribe tu usuario',
+                          hintText: loc.hint_login,
                           hintStyle: const TextStyle(color: Colors.grey),
                           prefixIcon: const Icon(
                             Icons.person,
@@ -178,7 +182,7 @@ class _AddUserFormState extends State<UpdateUserForm> {
                           fillColor: const Color.fromARGB(255, 255, 255, 255),
                         ),
                         validator: (value) => value == null || value.isEmpty
-                            ? 'Campo obligatorio'
+                            ? loc.field_required
                             : null,
                       ),
 
@@ -199,12 +203,12 @@ class _AddUserFormState extends State<UpdateUserForm> {
                       TextFormField(
                         controller: _idController,
                         decoration: InputDecoration(
-                          labelText: 'Identificador',
+                          labelText: loc.label_id,
                           labelStyle: const TextStyle(
                             color: Color.fromARGB(255, 25, 0, 255),
                             fontWeight: FontWeight.bold,
                           ),
-                          hintText: 'Escribe el ID del usuario',
+                          hintText: loc.hint_id,
                           hintStyle: const TextStyle(color: Colors.grey),
                           prefixIcon: const Icon(
                             Icons.verified_user,
@@ -242,7 +246,7 @@ class _AddUserFormState extends State<UpdateUserForm> {
                           fillColor: const Color.fromARGB(255, 255, 255, 255),
                         ),
                         validator: (value) => value == null || value.isEmpty
-                            ? 'Campo obligatorio'
+                            ? loc.field_required
                             : null,
                       ),
                       const SizedBox(height: 16),
@@ -250,12 +254,12 @@ class _AddUserFormState extends State<UpdateUserForm> {
                       TextFormField(
                         controller: _groupController,
                         decoration: InputDecoration(
-                          labelText: 'Grupo',
+                          labelText: loc.label_group,
                           labelStyle: const TextStyle(
                             color: Color.fromARGB(255, 25, 0, 255),
                             fontWeight: FontWeight.bold,
                           ),
-                          hintText: 'Ingrese el grupo',
+                          hintText: loc.hint_group,
                           hintStyle: const TextStyle(color: Colors.grey),
                           prefixIcon: const Icon(
                             Icons.group,
@@ -293,7 +297,7 @@ class _AddUserFormState extends State<UpdateUserForm> {
                           fillColor: const Color.fromARGB(255, 255, 255, 255),
                         ),
                         validator: (value) => value == null || value.isEmpty
-                            ? 'Campo obligatorio'
+                            ? loc.field_required
                             : null,
                       ),
 
@@ -301,12 +305,12 @@ class _AddUserFormState extends State<UpdateUserForm> {
 
                       DropdownButtonFormField<String>(
                         decoration: InputDecoration(
-                          labelText: 'Dominio',
+                          labelText: loc.label_domain,
                           labelStyle: const TextStyle(
                             color: Color.fromARGB(255, 25, 0, 255),
                             fontWeight: FontWeight.bold,
                           ),
-                          hintText: 'Selecciona un dominio',
+                          hintText: loc.hint_domain,
                           hintStyle: const TextStyle(color: Colors.grey),
                           prefixIcon: const Icon(
                             Icons.domain,
@@ -363,19 +367,19 @@ class _AddUserFormState extends State<UpdateUserForm> {
                           });
                         },
                         validator: (value) =>
-                            value == null ? 'Seleccione un dominio' : null,
+                            value == null ? loc.domain_required : null,
                       ),
 
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _quotaController,
                         decoration: InputDecoration(
-                          labelText: 'Quota',
+                          labelText: loc.label_quota,
                           labelStyle: const TextStyle(
                             color: Color.fromARGB(255, 25, 0, 255),
                             fontWeight: FontWeight.bold,
                           ),
-                          hintText: 'Ingresa la cuota',
+                          hintText: loc.hint_quota,
                           hintStyle: const TextStyle(color: Colors.grey),
                           prefixIcon: const Icon(
                             Icons.storage,
@@ -413,7 +417,7 @@ class _AddUserFormState extends State<UpdateUserForm> {
                           fillColor: const Color.fromARGB(255, 255, 255, 255),
                         ),
                         validator: (value) => value == null || value.isEmpty
-                            ? 'Campo obligatorio'
+                            ? loc.field_required
                             : null,
                       ),
 

@@ -3,17 +3,19 @@ import 'package:practice_acount_manager/features/users/presentation/components/s
 import 'package:practice_acount_manager/features/widgets/generals/button_user_navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
-import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 class UsersPage extends StatelessWidget {
   const UsersPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Gestión de Usuarios',
+        title: Text(
+          loc.user_management,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -31,13 +33,13 @@ class UsersPage extends StatelessWidget {
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      drawer: const AppDrawer(),
+      drawer: AppDrawer(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Center(child: ButtonOptions()),
+            Center(child: ButtonOptions()),
             const SizedBox(height: 20),
 
             //const SearchBarExample(),

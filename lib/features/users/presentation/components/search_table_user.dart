@@ -2,9 +2,9 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:practice_acount_manager/features/users/data/mock_users.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
-import 'package:practice_acount_manager/features/users/presentation/pages/frm_add_user.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/frm_update_user.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 class SearchTableUser extends StatefulWidget {
   const SearchTableUser({super.key});
@@ -14,19 +14,24 @@ class SearchTableUser extends StatefulWidget {
 }
 
 class _SearchTableUserState extends State<SearchTableUser> {
-  late final UserDataSource _dataSource;
+  late UserDataSource _dataSource;
+  bool _initialized = false;
   final TextEditingController _searchCtrl = TextEditingController();
-  //int _rowsPerPage = 9;
 
+  // Se ejecuta después de initState y cuando el contexto cambia
   @override
-  void initState() {
-    super.initState();
-
-    _dataSource = UserDataSource(
-      users: users,
-      onEdit: _onEdit,
-      onDelete: _onDelete,
-    );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final loc = AppLocalizations.of(context)!;
+      _dataSource = UserDataSource(
+        users: users,
+        onEdit: _onEdit,
+        onDelete: (user) => _onDelete(user, context),
+        loc: loc,
+      );
+      _initialized = true;
+    }
   }
 
   void _onEdit(User u) {
@@ -36,16 +41,17 @@ class _SearchTableUserState extends State<SearchTableUser> {
     );
   }
 
-  void _onDelete(User user) {
+  void _onDelete(User user, BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     AwesomeDialog(
       context: context,
       dialogType: DialogType.question,
       animType: AnimType.bottomSlide,
-      title: 'Eliminar',
-      desc: '¿Estás seguro de eliminar el usuario ${user.login}?',
-      btnCancelText: 'Cancelar',
+      title: loc.delete,
+      desc: '${user.login} ${loc.delete_confirmation}',
+      btnCancelText: loc.cancel,
       btnCancelOnPress: () {},
-      btnOkText: 'Confirmar',
+      btnOkText: loc.confirm,
       btnOkOnPress: () {
         setState(() {
           _dataSource.delete(user);
@@ -53,8 +59,8 @@ class _SearchTableUserState extends State<SearchTableUser> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Usuario "${user.login}" eliminado correctamente'),
-            duration: Duration(seconds: 3),
+            content: Text('"${user.login}" ${loc.deleted}'),
+            duration: const Duration(seconds: 3),
             backgroundColor: Colors.green,
             elevation: 5,
           ),
@@ -62,32 +68,6 @@ class _SearchTableUserState extends State<SearchTableUser> {
       },
     ).show();
   }
-
-  //void _onDelete(User user) {
-  // final confirm = await showDialog<bool>(
-  //   context: context,
-  //   builder: (context) => ConfirmAlertDialog(text: user.login),
-  // );
-
-  // if (confirm == true) {
-  //   setState(() {
-  //     _dataSource.delete(user);
-  //   });
-
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text('Usuario "${user.login}" eliminado corretamente'),
-  //       duration: Duration(seconds: 3),
-  //       backgroundColor: Colors.green,
-  //       elevation: 5,
-  //     ),
-  //   );
-  // }
-  //}
-
-  // void _onDelete(User u) {
-  //   users.remove(u);
-  // }
 
   @override
   void dispose() {
@@ -97,8 +77,15 @@ class _SearchTableUserState extends State<SearchTableUser> {
 
   @override
   Widget build(BuildContext context) {
+    // Mientras _dataSource no esté listo, muestra un loader
+    if (!_initialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final loc = AppLocalizations.of(context)!;
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       child: Column(
         children: [
           SearchBarExample(
@@ -108,10 +95,9 @@ class _SearchTableUserState extends State<SearchTableUser> {
             },
           ),
           const SizedBox(height: 16),
-
           ListView.builder(
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             itemCount: _dataSource.visibleCount,
             itemBuilder: (context, index) {
               final user = _dataSource.getVisibleAt(index);
@@ -127,7 +113,6 @@ class _SearchTableUserState extends State<SearchTableUser> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(width: 10),
-                      // Info en dos columnas
                       Expanded(
                         child: Row(
                           children: [
@@ -135,7 +120,6 @@ class _SearchTableUserState extends State<SearchTableUser> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Imagen circular (avatar) con imagen local
                                   const CircleAvatar(
                                     radius: 40,
                                     backgroundImage: NetworkImage(
@@ -143,10 +127,10 @@ class _SearchTableUserState extends State<SearchTableUser> {
                                     ),
                                     backgroundColor: Colors.grey,
                                   ),
-                                  SizedBox(height: 10),
-                                  const Text(
-                                    'Login',
-                                    style: TextStyle(
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    loc.label_login,
+                                    style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey,
                                       fontWeight: FontWeight.bold,
@@ -157,9 +141,9 @@ class _SearchTableUserState extends State<SearchTableUser> {
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                   const SizedBox(height: 12),
-                                  const Text(
-                                    'Email',
-                                    style: TextStyle(
+                                  Text(
+                                    loc.email,
+                                    style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey,
                                       fontWeight: FontWeight.bold,
@@ -190,9 +174,9 @@ class _SearchTableUserState extends State<SearchTableUser> {
                                     user.maildir,
                                     style: const TextStyle(fontSize: 13),
                                   ),
-                                  const Text(
-                                    'Identificación',
-                                    style: TextStyle(
+                                  Text(
+                                    loc.label_id,
+                                    style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey,
                                       fontWeight: FontWeight.bold,
@@ -203,9 +187,9 @@ class _SearchTableUserState extends State<SearchTableUser> {
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                   const SizedBox(height: 12),
-                                  const Text(
-                                    'Grupo',
-                                    style: TextStyle(
+                                  Text(
+                                    loc.label_group,
+                                    style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey,
                                       fontWeight: FontWeight.bold,
@@ -216,9 +200,9 @@ class _SearchTableUserState extends State<SearchTableUser> {
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                   const SizedBox(height: 12),
-                                  const Text(
-                                    'Quota',
-                                    style: TextStyle(
+                                  Text(
+                                    loc.label_quota,
+                                    style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey,
                                       fontWeight: FontWeight.bold,
@@ -234,35 +218,32 @@ class _SearchTableUserState extends State<SearchTableUser> {
                           ],
                         ),
                       ),
-                      // Botón de opciones
                       PopupMenuButton<String>(
                         onSelected: (value) {
                           if (value == 'edit') {
                             _onEdit(user);
                           } else if (value == 'delete') {
-                            _onDelete(user);
-                            //_dataSource.delete(user);
-                            //setState(() {});
+                            _onDelete(user, context);
                           }
                         },
                         itemBuilder: (context) => [
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 'edit',
                             child: Row(
                               children: [
                                 Icon(Icons.edit, color: Colors.blue),
-                                SizedBox(width: 8),
-                                Text('Editar'),
+                                const SizedBox(width: 8),
+                                Text(loc.edit),
                               ],
                             ),
                           ),
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 'delete',
                             child: Row(
                               children: [
                                 Icon(Icons.delete, color: Colors.red),
-                                SizedBox(width: 8),
-                                Text('Eliminar'),
+                                const SizedBox(width: 8),
+                                Text(loc.delete),
                               ],
                             ),
                           ),
@@ -284,6 +265,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
 class UserDataSource extends DataTableSource {
   final void Function(User) onEdit;
   final void Function(User) onDelete;
+  final AppLocalizations loc;
 
   final List<User> _all;
   List<User> _visible;
@@ -295,6 +277,7 @@ class UserDataSource extends DataTableSource {
     required List<User> users,
     required this.onEdit,
     required this.onDelete,
+    required this.loc,
   }) : _all = List<User>.from(users),
        _visible = List<User>.from(users);
 
@@ -352,12 +335,15 @@ class UserDataSource extends DataTableSource {
               PopupMenuItem(
                 value: 'edit',
                 child: Row(
-                  children: const [
-                    Icon(Icons.edit, color: Color.fromARGB(255, 72, 115, 242)),
-                    SizedBox(width: 8),
+                  children: [
+                    Icon(
+                      Icons.edit,
+                      color: const Color.fromARGB(255, 72, 115, 242),
+                    ),
+                    const SizedBox(width: 8),
                     Text(
-                      'Editar',
-                      style: TextStyle(
+                      loc.edit,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Color.fromARGB(255, 72, 115, 242),
@@ -369,12 +355,12 @@ class UserDataSource extends DataTableSource {
               PopupMenuItem(
                 value: 'delete',
                 child: Row(
-                  children: const [
-                    Icon(Icons.delete, color: Colors.red),
-                    SizedBox(width: 8),
+                  children: [
+                    const Icon(Icons.delete, color: Colors.red),
+                    const SizedBox(width: 8),
                     Text(
-                      'Eliminar',
-                      style: TextStyle(
+                      loc.delete,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.red,

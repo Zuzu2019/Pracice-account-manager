@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 import 'package:practice_acount_manager/main.dart';
 
 class LoginForm extends StatefulWidget {
@@ -41,6 +42,7 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Form(
       key: _formKey,
       child: Column(
@@ -48,8 +50,8 @@ class _LoginFormState extends State<LoginForm> {
           TextFormField(
             controller: _emailCtrl,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              labelText: 'Correo electrónico',
+            decoration: InputDecoration(
+              labelText: loc.email,
               labelStyle: TextStyle(color: Color.fromARGB(255, 87, 86, 86)),
               focusedBorder: OutlineInputBorder(
                 borderSide: BorderSide(
@@ -62,10 +64,10 @@ class _LoginFormState extends State<LoginForm> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Campo obligatorio';
+                return loc.field_required;
               }
               if (!value.contains('@')) {
-                return 'Correo inválido';
+                return loc.invalidEmail;
               }
               return null;
             },
@@ -75,7 +77,7 @@ class _LoginFormState extends State<LoginForm> {
             controller: _passCtrl,
             obscureText: _obscure,
             decoration: InputDecoration(
-              labelText: 'Contraseña',
+              labelText: loc.label_password,
               prefixIcon: const Icon(Icons.lock),
               labelStyle: TextStyle(color: Color.fromARGB(255, 87, 86, 86)),
               border: OutlineInputBorder(),
@@ -121,7 +123,7 @@ class _LoginFormState extends State<LoginForm> {
               // style: ElevatedButton.styleFrom(
               //   padding: const EdgeInsets.symmetric(vertical: 14),
               // ),
-              child: const Text('Ingresar', style: TextStyle(fontSize: 16)),
+              child: Text(loc.signIn, style: TextStyle(fontSize: 16)),
             ),
           ),
         ],

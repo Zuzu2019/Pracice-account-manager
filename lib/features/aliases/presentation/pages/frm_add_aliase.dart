@@ -4,6 +4,7 @@ import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_aliase_navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_cancel.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 class AddAliasForm extends StatefulWidget {
   final Aliases alias;
@@ -28,7 +29,9 @@ class _AddAliasFormState extends State<AddAliasForm> {
     _remotoController = TextEditingController(text: widget.alias.remoto);
   }
 
-  void _submitForm() {
+  void _submitForm(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     if (_formKey.currentState!.validate()) {
       final updateAliases = Aliases(
         local: _localController.text.trim(),
@@ -40,8 +43,8 @@ class _AddAliasFormState extends State<AddAliasForm> {
           context: context,
           dialogType: DialogType.info,
           animType: AnimType.rightSlide,
-          title: 'Alias actualizado',
-          desc: 'Los datos del alias fueron modificados correctamente.',
+          title: loc.aliasUpdated,
+          desc: loc.aliasAddedSuccessfully,
           btnOkOnPress: () {
             Navigator.pop(context, updateAliases); // devolver alias editado
           },
@@ -52,8 +55,8 @@ class _AddAliasFormState extends State<AddAliasForm> {
           context: context,
           dialogType: DialogType.success,
           animType: AnimType.rightSlide,
-          title: 'Éxito',
-          desc: 'Alias agregado correctamente.',
+          title: loc.successTitle,
+          desc: loc.aliasAddedSuccessfully,
           btnOkOnPress: () {
             _formKey.currentState!.reset();
             _localController.clear();
@@ -74,8 +77,9 @@ class _AddAliasFormState extends State<AddAliasForm> {
 
   @override
   Widget build(BuildContext context) {
-    final title = widget.isEditing ? 'Editar alias' : 'Agregar alias';
-    final btnText = widget.isEditing ? 'Actualizar' : 'Agregar';
+    final loc = AppLocalizations.of(context)!;
+    final title = widget.isEditing ? loc.editAlias : loc.addAlias;
+    final btnText = widget.isEditing ? loc.update_button : loc.button_add;
 
     return Scaffold(
       appBar: AppBar(
@@ -103,20 +107,8 @@ class _AddAliasFormState extends State<AddAliasForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const ButtonOptionsAliase(),
+            ButtonOptionsAliase(),
             const SizedBox(height: 30),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: const [
-            //     Icon(Icons.alternate_email, size: 30),
-            //     SizedBox(width: 10),
-            //     Text(
-            //       'Aliases',
-            //       style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            //       textAlign: TextAlign.center,
-            //     ),
-            //   ],
-            // ),
             const SizedBox(height: 16),
             Card(
               elevation: 5,
@@ -136,12 +128,12 @@ class _AddAliasFormState extends State<AddAliasForm> {
                       TextFormField(
                         controller: _localController,
                         decoration: InputDecoration(
-                          labelText: 'Local',
+                          labelText: loc.localLabel,
                           labelStyle: const TextStyle(
                             color: Color.fromARGB(255, 25, 0, 255),
                             fontWeight: FontWeight.bold,
                           ),
-                          hintText: 'Ingresa tu alias local',
+                          hintText: loc.localAliasHint,
                           hintStyle: const TextStyle(color: Colors.grey),
                           prefixIcon: const Icon(
                             Icons.person,
@@ -179,7 +171,7 @@ class _AddAliasFormState extends State<AddAliasForm> {
                           fillColor: const Color.fromARGB(255, 255, 255, 255),
                         ),
                         validator: (value) => value == null || value.isEmpty
-                            ? 'Campo obligatorio'
+                            ? loc.field_required
                             : null,
                       ),
 
@@ -190,12 +182,12 @@ class _AddAliasFormState extends State<AddAliasForm> {
                         maxLines: null,
                         keyboardType: TextInputType.multiline,
                         decoration: InputDecoration(
-                          labelText: 'Remoto',
+                          labelText: loc.remoteLabel,
                           labelStyle: const TextStyle(
                             color: Color.fromARGB(255, 25, 0, 255),
                             fontWeight: FontWeight.bold,
                           ),
-                          hintText: 'Ingresa tu alias remoto',
+                          hintText: loc.remoteAliasHint,
                           hintStyle: const TextStyle(color: Colors.grey),
                           prefixIcon: const Icon(
                             Icons.cloud,
@@ -233,7 +225,7 @@ class _AddAliasFormState extends State<AddAliasForm> {
                           fillColor: const Color.fromARGB(255, 255, 255, 255),
                         ),
                         validator: (value) => value == null || value.isEmpty
-                            ? 'Campo obligatorio'
+                            ? loc.field_required
                             : null,
                       ),
 
@@ -242,7 +234,7 @@ class _AddAliasFormState extends State<AddAliasForm> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ElevatedButton(
-                            onPressed: _submitForm,
+                            onPressed: () => _submitForm(context),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color.fromARGB(
                                 255,
