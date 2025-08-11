@@ -17,7 +17,7 @@ class ButtonCancel extends StatelessWidget {
       btnOkOnPress: () {
         Navigator.of(
           context,
-        ).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+        ).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
       },
     ).show();
   }

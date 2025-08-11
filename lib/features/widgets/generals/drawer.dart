@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
+import 'package:practice_acount_manager/features/widgets/generals/home.dart';
 import 'package:practice_acount_manager/main.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:practice_acount_manager/features/auth/presentation/service/auth_service.dart';
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
@@ -27,7 +29,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black38,
+                    color: Color.fromARGB(96, 255, 255, 255),
                     blurRadius: 2,
                     offset: Offset(0, 3),
                   ),
@@ -115,9 +117,8 @@ class AppDrawer extends StatelessWidget {
                   btnCancelText: 'Cancelar',
                   btnCancelOnPress: () {},
                   btnOkText: 'Confirmar',
-                  btnOkOnPress: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pushReplacementNamed('/login');
+                  btnOkOnPress: () async {
+                    await logout(context);
                   },
                 ).show();
               },
