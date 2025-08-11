@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 class ConfirmAlertDialog extends StatelessWidget {
   final String text;
@@ -7,6 +8,8 @@ class ConfirmAlertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return AlertDialog(
       content: RichText(
         //textAlign: TextAlign.center,
@@ -20,7 +23,7 @@ class ConfirmAlertDialog extends StatelessWidget {
               text: text,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            TextSpan(text: ' se va a eliminar. ¿Está seguro de continuar?'),
+            TextSpan(text: loc.delete_confirmation),
           ],
         ),
       ),
@@ -28,13 +31,13 @@ class ConfirmAlertDialog extends StatelessWidget {
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
           child: Text(
-            'Cancelar',
+            loc.cancel,
             style: TextStyle(color: const Color.fromARGB(255, 56, 55, 55)),
           ),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(true),
-          child: Text('Eliminar', style: TextStyle(color: Colors.red)),
+          child: Text(loc.delete, style: TextStyle(color: Colors.red)),
         ),
       ],
     );

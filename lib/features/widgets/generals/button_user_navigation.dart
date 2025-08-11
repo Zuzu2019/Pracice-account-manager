@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/frm_add_user.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 enum ButtonAction { addUser, listUsers }
 
 class ButtonOptions extends StatefulWidget {
+  //final void Function(Locale) onLocaleChange;
   const ButtonOptions({super.key});
 
   @override
@@ -17,6 +18,8 @@ class _ButtonOptionsState extends State<ButtonOptions> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -35,7 +38,7 @@ class _ButtonOptionsState extends State<ButtonOptions> {
                 );
               },
               icon: const Icon(Icons.person_add),
-              label: const Text('Nuevo Usuario'),
+              label: Text(loc.title_add_user),
               style: ElevatedButton.styleFrom(
                 backgroundColor: selectedAction == ButtonAction.addUser
                     ? const Color.fromARGB(255, 0, 100, 255)
@@ -58,11 +61,11 @@ class _ButtonOptionsState extends State<ButtonOptions> {
                 });
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const UsersPage()),
+                  MaterialPageRoute(builder: (_) => UsersPage()),
                 );
               },
               icon: const Icon(Icons.list),
-              label: const Text('Listado'),
+              label: Text(loc.list),
               style: ElevatedButton.styleFrom(
                 backgroundColor: selectedAction == ButtonAction.listUsers
                     ? const Color.fromARGB(255, 0, 100, 255)

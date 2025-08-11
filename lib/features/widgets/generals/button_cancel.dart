@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 class ButtonCancel extends StatelessWidget {
   const ButtonCancel({super.key});
 
   void _showCancelConfirmation(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     AwesomeDialog(
       context: context,
       dialogType: DialogType.warning,
       animType: AnimType.topSlide,
-      title: '¿Cancelar?',
-      desc: '¿Estás seguro de que deseas cancelar?',
+      title: loc.cancel,
+      desc: loc.cancelConfirmation,
       btnCancelText: 'No',
-      btnOkText: 'Sí, Cancelar',
+      btnOkText: loc.cancel,
       btnCancelOnPress: () {},
       btnOkOnPress: () {
         Navigator.of(
@@ -24,15 +27,17 @@ class ButtonCancel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return ElevatedButton(
       onPressed: () => _showCancelConfirmation(context),
-      child: const Text('Cancelar'),
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color.fromARGB(255, 177, 43, 34),
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
+      child: Text(loc.cancel),
     );
   }
 }
