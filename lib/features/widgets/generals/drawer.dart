@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
+import 'package:practice_acount_manager/riverpod/statenotifier.dart';
 import 'package:practice_acount_manager/features/widgets/generals/home.dart';
-import 'package:practice_acount_manager/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:practice_acount_manager/features/auth/presentation/service/auth_service.dart';
-class AppDrawer extends StatelessWidget {
+
+class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
     return SizedBox(
       width: 230,
       child: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
+            DrawerHeader(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -38,7 +42,7 @@ class AppDrawer extends StatelessWidget {
               child: Align(
                 alignment: Alignment.bottomLeft,
                 child: Text(
-                  'Menú',
+                  loc.menu,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 30,
@@ -56,55 +60,53 @@ class AppDrawer extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.home, color: Colors.indigo),
-              title: const Text(
-                'Home',
+              title: Text(
+                loc.home,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const HomePage()),
+                  MaterialPageRoute(builder: (_) => HomePage()),
                 );
               },
             ),
             ListTile(
               leading: const Icon(Icons.alternate_email, color: Colors.indigo),
-              title: const Text(
-                'Aliases',
+              title: Text(
+                loc.aliases,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const AliasPage()),
+                  MaterialPageRoute(builder: (_) => AliasPage()),
                 );
               },
             ),
-            //const Divider(),
             ListTile(
               leading: const Icon(Icons.people, color: Colors.indigo),
-              title: const Text(
-                'Users',
+              title: Text(
+                loc.users,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const UsersPage()),
+                  MaterialPageRoute(builder: (_) => UsersPage()),
                 );
               },
             ),
-            //const Divider(),
             ListTile(
               leading: const Icon(
                 Icons.exit_to_app,
                 color: Color.fromARGB(255, 172, 49, 49),
               ),
-              title: const Text(
-                'Cerrar Sesión',
+              title: Text(
+                loc.logout,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
               onTap: () {
@@ -112,20 +114,44 @@ class AppDrawer extends StatelessWidget {
                   context: context,
                   dialogType: DialogType.question,
                   animType: AnimType.bottomSlide,
-                  title: '¿Cerrar sesión?',
-                  desc: '¿Estás seguro que deseas cerrar sesión?',
-                  btnCancelText: 'Cancelar',
+                  title: loc.logout,
+                  desc: loc.logout_confirmation,
+                  btnCancelText: loc.cancel,
                   btnCancelOnPress: () {},
-                  btnOkText: 'Confirmar',
-                  btnOkOnPress: () async {
-                    await logout(context);
+                  btnOkText: loc.confirm,
+                  btnOkOnPress: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacementNamed('/login');
                   },
                 ).show();
               },
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+            ListTile(
+              leading: const Icon(Icons.language, color: Colors.indigo),
+              title: Text(
+                (loc.change_language), // Usa tus traducciones aquí
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: Text(loc.select_language),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          title: const Text('Español'),
+                          onTap: () {
+                            ref
+                                .read(localeProvider.notifier)
+                                .setLocale(Locale('es'));
+                            Navigator.pop(context);
+                          },
+                        ),
+                        ListTile(
+                          title: const Text('English'),
+                          onTap

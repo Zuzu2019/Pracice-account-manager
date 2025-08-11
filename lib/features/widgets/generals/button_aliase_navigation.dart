@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/frm_add_aliase.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 enum ButtonAction { addAliase, listAliase }
 
@@ -17,6 +18,8 @@ class _ButtonOptionsAliaseState extends State<ButtonOptionsAliase> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -40,7 +43,7 @@ class _ButtonOptionsAliaseState extends State<ButtonOptionsAliase> {
                 );
               },
               icon: const Icon(Icons.person_add),
-              label: const Text('Nuevo Alias'),
+              label: Text(loc.addAlias),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _selectedAction == ButtonAction.addAliase
                     ? const Color.fromARGB(255, 0, 100, 255)
@@ -63,11 +66,11 @@ class _ButtonOptionsAliaseState extends State<ButtonOptionsAliase> {
                 });
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const AliasPage()),
+                  MaterialPageRoute(builder: (_) => AliasPage()),
                 );
               },
               icon: const Icon(Icons.list),
-              label: const Text('Listado'),
+              label: Text(loc.list),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _selectedAction == ButtonAction.listAliase
                     ? const Color.fromARGB(255, 0, 100, 255)

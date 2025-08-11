@@ -4,6 +4,7 @@ import 'package:practice_acount_manager/features/aliases/data/mock_aliases.dart'
 import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/frm_add_aliase.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 class SearchTableAliases extends StatefulWidget {
   const SearchTableAliases({super.key});
@@ -14,18 +15,24 @@ class SearchTableAliases extends StatefulWidget {
 
 class _SearchTableAliasesState extends State<SearchTableAliases> {
   late final AliasesDataSource _dataSource;
+  bool _initialized = false;
 
   final TextEditingController _searchCtrl = TextEditingController();
   //int _rowsPerPage = 9;
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    _dataSource = AliasesDataSource(
-      alias: alias,
-      onEdit: _onEdit,
-      onDelete: _onDelete,
-    );
+    if (!_initialized) {
+      final loc = AppLocalizations.of(context)!;
+      _dataSource = AliasesDataSource(
+        alias: alias,
+        onEdit: _onEdit,
+        onDelete: (alias) => _onDelete(alias, context),
+        loc: loc,
+      );
+      _initialized = true;
+    }
   }
 
   void _onEdit(Aliases u) {
@@ -37,16 +44,17 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
     );
   }
 
-  void _onDelete(Aliases alias) {
+  void _onDelete(Aliases alias, BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     AwesomeDialog(
       context: context,
       dialogType: DialogType.question,
       animType: AnimType.bottomSlide,
-      title: 'Eliminar',
-      desc: '¿Estás seguro de eliminar a ${alias.local}?',
-      btnCancelText: 'Cancelar',
+      title: loc.delete,
+      desc: '${alias.local} ${loc.delete_confirmation}?',
+      btnCancelText: loc.cancel,
       btnCancelOnPress: () {},
-      btnOkText: 'Confirmar',
+      btnOkText: loc.confirm,
       btnOkOnPress: () {
         setState(() {
           _dataSource.delete(alias);
@@ -54,7 +62,7 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Usuario "${alias.local}" eliminado correctamente'),
+            content: Text('"${alias.local}" ${loc.deleted}'),
             duration: Duration(seconds: 3),
             backgroundColor: Colors.green,
             elevation: 5,
@@ -64,29 +72,6 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
     ).show();
   }
 
-  // void _onDelete(Aliases alias) async {
-  //   final confirm = await showDialog(
-  //     context: context,
-  //     builder: (context) => ConfirmAlertDialog(text: alias.local),
-  //   );
-
-  //   if (confirm == true) {
-  //     setState(() {
-  //       _dataSource.delete(alias);
-  //     });
-
-  //     // ignore: use_build_context_synchronously
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text('Alias "${alias.local}" eliminado correctamente'),
-  //         duration: Duration(seconds: 3),
-  //         backgroundColor: Colors.green,
-  //         elevation: 5,
-  //       ),
-  //     );
-  //   }
-  // }
-
   @override
   void dispose() {
     _searchCtrl.dispose();
@@ -95,6 +80,8 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return SingleChildScrollView(
       padding: EdgeInsets.all(15),
       child: Column(
@@ -121,11 +108,11 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
                 child: ListTile(
                   leading: const Icon(Icons.person, color: Colors.blue),
                   title: Text(
-                    'Local: ${alias.local}',
+                    '${loc.localLabel}: ${alias.local}',
                     style: const TextStyle(fontSize: 13),
                   ),
                   subtitle: Text(
-                    'Remoto: ${alias.remoto}',
+                    '${loc.remoteLabel}: ${alias.remoto}',
                     style: TextStyle(fontSize: 13),
                   ),
                   trailing: PopupMenuButton<String>(
@@ -133,27 +120,27 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
                       if (value == 'edit') {
                         _onEdit(alias);
                       } else if (value == 'delete') {
-                        _onDelete(alias);
+                        _onDelete(alias, context);
                       }
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
                             Icon(Icons.edit, color: Colors.blue),
                             SizedBox(width: 8),
-                            Text('Editar'),
+                            Text(loc.edit),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
                             Icon(Icons.delete, color: Colors.red),
                             SizedBox(width: 8),
-                            Text('Eliminar'),
+                            Text(loc.delete),
                           ],
                         ),
                       ),
@@ -172,7 +159,7 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
 class AliasesDataSource extends DataTableSource {
   final void Function(Aliases) onEdit;
   final void Function(Aliases) onDelete;
-
+  final AppLocalizations loc;
   final List<Aliases> _all;
   List<Aliases> _visible;
 
@@ -183,6 +170,7 @@ class AliasesDataSource extends DataTableSource {
     required List<Aliases> alias,
     required this.onEdit,
     required this.onDelete,
+    required this.loc,
   }) : _all = List<Aliases>.from(alias),
        _visible = List<Aliases>.from(alias);
 
@@ -233,11 +221,11 @@ class AliasesDataSource extends DataTableSource {
               PopupMenuItem(
                 value: 'edit',
                 child: Row(
-                  children: const [
+                  children: [
                     Icon(Icons.edit, color: Color.fromARGB(255, 72, 115, 242)),
                     SizedBox(width: 8),
                     Text(
-                      'Editar',
+                      loc.edit,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -250,11 +238,11 @@ class AliasesDataSource extends DataTableSource {
               PopupMenuItem(
                 value: 'delete',
                 child: Row(
-                  children: const [
+                  children: [
                     Icon(Icons.delete, color: Colors.red),
                     SizedBox(width: 8),
                     Text(
-                      'Eliminar',
+                      loc.delete,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

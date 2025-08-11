@@ -35,14 +35,14 @@ class LoginPage extends StatelessWidget {
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.lock, size: 80, color: Colors.blue),
-              SizedBox(height: 16),
-              Text(
+            children: [
+              const Icon(Icons.lock, size: 80, color: Colors.blue),
+              const SizedBox(height: 16),
+              const Text(
                 'Iniciar sesión',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
               LoginForm(),
             ],
           ),

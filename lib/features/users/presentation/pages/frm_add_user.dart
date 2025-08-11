@@ -5,6 +5,7 @@ import 'package:practice_acount_manager/features/widgets/generals/button_cancel.
 import 'package:practice_acount_manager/features/widgets/generals/button_user_navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_user.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 class AddUserForm extends StatefulWidget {
   const AddUserForm({super.key});
@@ -39,14 +40,16 @@ class _AddUserFormState extends State<AddUserForm> {
     _dominioController = TextEditingController();
   }
 
-  void _submitForm() {
+  void _submitForm(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     if (_formKey.currentState!.validate()) {
       if (_passwordController.text != _confirmPasswordController.text) {
         AwesomeDialog(
           context: context,
           dialogType: DialogType.error,
-          title: 'Error',
-          desc: 'Las contraseñas no coinciden',
+          title: loc.errorTitle,
+          desc: loc.password_mismatch,
           btnOkOnPress: () {},
         ).show();
         return;
@@ -55,8 +58,8 @@ class _AddUserFormState extends State<AddUserForm> {
       AwesomeDialog(
         context: context,
         dialogType: DialogType.success,
-        title: 'Éxito',
-        desc: 'Usuario agregado correctamente',
+        title: loc.successTitle,
+        desc: loc.userAddedSuccessfully,
         btnOkOnPress: () {
           _formKey.currentState!.reset();
           _loginController.clear();
@@ -86,12 +89,12 @@ class _AddUserFormState extends State<AddUserForm> {
   @override
   Widget build(BuildContext context) {
     final title = 'Agregar usuario';
-    final btnText = 'Agregar';
 
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          title,
+          loc.title_add_user, // Usar la localización
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -114,7 +117,7 @@ class _AddUserFormState extends State<AddUserForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const ButtonOptions(),
+            ButtonOptions(),
             const SizedBox(height: 30),
             const SizedBox(height: 16),
 
@@ -136,12 +139,14 @@ class _AddUserFormState extends State<AddUserForm> {
                       TextFormField(
                         controller: _loginController,
                         decoration: InputDecoration(
-                          labelText: 'Login',
+                          //labelText: 'Login',
+                          //labelText:.label_login,
                           labelStyle: const TextStyle(
                             color: Color.fromARGB(255, 25, 0, 255),
                             fontWeight: FontWeight.bold,
                           ),
-                          hintText: 'Escribe tu usuario',
+                          hintText: loc.hint_login, // Usar la localización
+                          //hintText: 'Escribe tu usuario',
                           hintStyle: const TextStyle(color: Colors.grey),
                           prefixIcon: const Icon(
                             Icons.person,
@@ -179,7 +184,8 @@ class _AddUserFormState extends State<AddUserForm> {
                           fillColor: const Color.fromARGB(255, 255, 255, 255),
                         ),
                         validator: (value) => value == null || value.isEmpty
-                            ? 'Campo obligatorio'
+                            ? loc
+                                  .field_required //'Campo obligatorio'
                             : null,
                       ),
 
@@ -200,12 +206,12 @@ class _AddUserFormState extends State<AddUserForm> {
                       TextFormField(
                         controller: _idController,
                         decoration: InputDecoration(
-                          labelText: 'Identificador',
+                          labelText: loc.label_id, //'Identificador',
                           labelStyle: const TextStyle(
                             color: Color.fromARGB(255, 25, 0, 255),
                             fontWeight: FontWeight.bold,
                           ),
-                          hintText: 'Escribe el ID del usuario',
+                          hintText: loc.hint_id, //'Escribe el ID del usuario',
                           hintStyle: const TextStyle(color: Colors.grey),
                           prefixIcon: const Icon(
                             Icons.verified_user,
@@ -243,7 +249,8 @@ class _AddUserFormState extends State<AddUserForm> {
                           fillColor: const Color.fromARGB(255, 255, 255, 255),
                         ),
                         validator: (value) => value == null || value.isEmpty
-                            ? 'Campo obligatorio'
+                            ? loc
+                                  .field_required //'Campo obligatorio'
                             : null,
                       ),
                       const SizedBox(height: 16),
@@ -251,12 +258,12 @@ class _AddUserFormState extends State<AddUserForm> {
                       TextFormField(
                         controller: _groupController,
                         decoration: InputDecoration(
-                          labelText: 'Grupo',
+                          labelText: loc.label_group, //'Grupo',
                           labelStyle: const TextStyle(
                             color: Color.fromARGB(255, 25, 0, 255),
                             fontWeight: FontWeight.bold,
                           ),
-                          hintText: 'Ingrese el grupo',
+                          hintText: loc.hint_group, //'Ingrese el grupo',
                           hintStyle: const TextStyle(color: Colors.grey),
                           prefixIcon: const Icon(
                             Icons.group,
@@ -294,7 +301,8 @@ class _AddUserFormState extends State<AddUserForm> {
                           fillColor: const Color.fromARGB(255, 255, 255, 255),
                         ),
                         validator: (value) => value == null || value.isEmpty
-                            ? 'Campo obligatorio'
+                            ? loc
+                                  .field_required //'Campo obligatorio'
                             : null,
                       ),
 
@@ -302,12 +310,13 @@ class _AddUserFormState extends State<AddUserForm> {
 
                       DropdownButtonFormField<String>(
                         decoration: InputDecoration(
-                          labelText: 'Dominio',
+                          labelText: loc.label_domain, //'Dominio',
                           labelStyle: const TextStyle(
                             color: Color.fromARGB(255, 25, 0, 255),
                             fontWeight: FontWeight.bold,
                           ),
-                          hintText: 'Selecciona un dominio',
+                          hintText:
+                              loc.domain_required, //'Selecciona un dominio',
                           hintStyle: const TextStyle(color: Colors.grey),
                           prefixIcon: const Icon(
                             Icons.domain,
@@ -364,19 +373,19 @@ class _AddUserFormState extends State<AddUserForm> {
                           });
                         },
                         validator: (value) =>
-                            value == null ? 'Seleccione un dominio' : null,
+                            value == null ? loc.hint_domain : null,
                       ),
 
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _quotaController,
                         decoration: InputDecoration(
-                          labelText: 'Quota',
+                          labelText: loc.label_quota, //'Quota',
                           labelStyle: const TextStyle(
                             color: Color.fromARGB(255, 25, 0, 255),
                             fontWeight: FontWeight.bold,
                           ),
-                          hintText: 'Ingresa la cuota',
+                          hintText: loc.hint_quota, //'Ingresa la cuota',
                           hintStyle: const TextStyle(color: Colors.grey),
                           prefixIcon: const Icon(
                             Icons.storage,
@@ -414,7 +423,8 @@ class _AddUserFormState extends State<AddUserForm> {
                           fillColor: const Color.fromARGB(255, 255, 255, 255),
                         ),
                         validator: (value) => value == null || value.isEmpty
-                            ? 'Campo obligatorio'
+                            ? loc
+                                  .field_required //'Campo obligatorio'
                             : null,
                       ),
 
@@ -424,7 +434,7 @@ class _AddUserFormState extends State<AddUserForm> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ElevatedButton(
-                            onPressed: _submitForm,
+                            onPressed: () => _submitForm(context),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color.fromARGB(
                                 255,
@@ -441,7 +451,7 @@ class _AddUserFormState extends State<AddUserForm> {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                             ),
-                            child: Text(btnText),
+                            child: Text(loc.button_add),
                           ),
                           const SizedBox(width: 16),
                           const ButtonCancel(),

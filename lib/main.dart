@@ -1,15 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/auth/presentation/pages/login_page_local.dart';
 import 'package:practice_acount_manager/features/auth/presentation/service/auth_Service.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
+import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
+import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
+import 'package:practice_acount_manager/riverpod/statenotifier.dart'; // tu provider de locale
 import 'package:practice_acount_manager/features/widgets/generals/home.dart';
 import 'package:oidc_default_store/oidc_default_store.dart';
 
-late final AuthService authService;
+late final AuthService authService; // Declarar AuthService globalmente
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,15 +23,25 @@ Future<void> main() async {
   await OidcDefaultStore().init();
   authService = AuthService();
   await authService.initialize();
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp())); // Colocamos la ejecución del app después de la inicialización
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeProvider);
+
     return MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: locale, // locale global gestionado por Riverpod
       debugShowCheckedModeBanner: false,
       initialRoute: '/select_login',
       routes: {
@@ -33,12 +49,13 @@ class MyApp extends StatelessWidget {
         '/users': (context) => const UsersPage(),
         '/alias': (context) => const AliasPage(),
         '/login': (context) => const LoginPage(),
-        '/select_login': (context) => const SelectLoginPage(),
+        '/select_login': (context) => const SelectLoginPage(), // Corrigiendo la ruta
       },
     );
   }
 }
 
+// Clase para la página de inicio de sesión
 class SelectLoginPage extends StatefulWidget {
   const SelectLoginPage({super.key});
 
@@ -111,7 +128,30 @@ class _SelectLoginPageState extends State<SelectLoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          loc.home,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 23,
+            letterSpacing: 1.2,
+          ),
+        ),
+        backgroundColor: const Color.fromARGB(255, 54, 84, 255),
+        centerTitle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(5),
+            top: Radius.circular(5),
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      drawer: const AppDrawer(),
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -196,6 +236,7 @@ class _SelectLoginPageState extends State<SelectLoginPage> {
           ),
         ],
       ),
+      bottomNavigationBar: const Footer(),
     );
   }
 }
