@@ -69,3 +69,7 @@ coverage/
 # OS Files
 .DS_Store
 Thumbs.db
+
+
+# global var
+.env

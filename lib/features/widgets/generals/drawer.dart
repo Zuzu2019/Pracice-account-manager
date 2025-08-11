@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
-import 'package:practice_acount_manager/main.dart';
 import 'package:practice_acount_manager/riverpod/statenotifier.dart';
+import 'package:practice_acount_manager/features/widgets/generals/home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:practice_acount_manager/features/auth/presentation/service/auth_service.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -31,7 +33,7 @@ class AppDrawer extends ConsumerWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black38,
+                    color: Color.fromARGB(96, 255, 255, 255),
                     blurRadius: 2,
                     offset: Offset(0, 3),
                   ),
@@ -84,7 +86,6 @@ class AppDrawer extends ConsumerWidget {
                 );
               },
             ),
-            //const Divider(),
             ListTile(
               leading: const Icon(Icons.people, color: Colors.indigo),
               title: Text(
@@ -99,7 +100,6 @@ class AppDrawer extends ConsumerWidget {
                 );
               },
             ),
-            //const Divider(),
             ListTile(
               leading: const Icon(
                 Icons.exit_to_app,
@@ -126,7 +126,6 @@ class AppDrawer extends ConsumerWidget {
                 ).show();
               },
             ),
-
             ListTile(
               leading: const Icon(Icons.language, color: Colors.indigo),
               title: Text(
@@ -155,22 +154,4 @@ class AppDrawer extends ConsumerWidget {
                         ),
                         ListTile(
                           title: const Text('English'),
-                          onTap: () {
-                            ref
-                                .read(localeProvider.notifier)
-                                .setLocale(Locale('en'));
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+                          onTap
