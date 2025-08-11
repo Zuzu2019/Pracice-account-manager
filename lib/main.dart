@@ -10,8 +10,9 @@ import 'package:practice_acount_manager/features/auth/presentation/service/auth_
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
 import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
-import 'package:practice_acount_manager/l10n/l10n.dart';
 import 'package:oidc_default_store/oidc_default_store.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
+import 'package:practice_acount_manager/riverpod/statenotifier.dart';
 
 late final AuthService authService;
 

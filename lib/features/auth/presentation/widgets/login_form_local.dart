@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
 import 'package:practice_acount_manager/features/widgets/generals/home.dart';
-import 'package:practice_acount_manager/main.dart';
+import 'package:practice_acount_manager/main.dart' hide HomePage;
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});

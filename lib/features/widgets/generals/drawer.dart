@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
 import 'package:practice_acount_manager/features/widgets/generals/home.dart';
@@ -128,9 +127,6 @@ class AppDrawer extends ConsumerWidget {
                   context: context,
                   dialogType: DialogType.question,
                   animType: AnimType.bottomSlide,
-                  title: loc.logout,
-                  desc: loc.logout_confirmation,
-                  btnCancelText: loc.cancel,
                   title: loc.logout,
                   desc: loc.logout_confirmation,
                   btnCancelText: loc.cancel,
