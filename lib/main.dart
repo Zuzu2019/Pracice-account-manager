@@ -1,18 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/auth/presentation/pages/login_page_local.dart';
 import 'package:practice_acount_manager/features/auth/presentation/service/auth_Service.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
 import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
+import 'package:practice_acount_manager/l10n/l10n.dart';
 import 'package:oidc_default_store/oidc_default_store.dart';
-import 'package:practice_acount_manager/l10n/app_localizations.dart';
-import 'package:practice_acount_manager/riverpod/statenotifier.dart';
 
 late final AuthService authService;
 
@@ -24,8 +23,7 @@ Future<void> main() async {
   await authService.initialize();
 
   runApp(
-    const ProviderScope(
-      // Necesario para Riverpod
+    const ProviderScope( // Necesario para Riverpod
       child: MyApp(),
     ),
   );
@@ -72,7 +70,7 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          loc.home, // Usar traducción
+          loc.home,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
