@@ -3,11 +3,11 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
-import 'package:practice_acount_manager/l10n/app_localizations.dart';
-import 'package:practice_acount_manager/riverpod/statenotifier.dart';
 import 'package:practice_acount_manager/features/widgets/generals/home.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
+import 'package:practice_acount_manager/main.dart' hide HomePage;
 import 'package:practice_acount_manager/features/auth/presentation/service/auth_service.dart';
+import 'package:practice_acount_manager/riverpod/statenotifier.dart'; // para logout
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -15,6 +15,7 @@ class AppDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loc = AppLocalizations.of(context)!;
+
     return SizedBox(
       width: 230,
       child: Drawer(
@@ -22,7 +23,7 @@ class AppDrawer extends ConsumerWidget {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
                     Color.fromARGB(255, 195, 204, 255),
@@ -43,7 +44,7 @@ class AppDrawer extends ConsumerWidget {
                 alignment: Alignment.bottomLeft,
                 child: Text(
                   loc.menu,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
@@ -62,13 +63,16 @@ class AppDrawer extends ConsumerWidget {
               leading: const Icon(Icons.home, color: Colors.indigo),
               title: Text(
                 loc.home,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => HomePage()),
+                  MaterialPageRoute(builder: (_) => const HomePage()),
                 );
               },
             ),
@@ -76,13 +80,16 @@ class AppDrawer extends ConsumerWidget {
               leading: const Icon(Icons.alternate_email, color: Colors.indigo),
               title: Text(
                 loc.aliases,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => AliasPage()),
+                  MaterialPageRoute(builder: (_) => const AliasPage()),
                 );
               },
             ),
@@ -90,13 +97,16 @@ class AppDrawer extends ConsumerWidget {
               leading: const Icon(Icons.people, color: Colors.indigo),
               title: Text(
                 loc.users,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => UsersPage()),
+                  MaterialPageRoute(builder: (_) => const UsersPage()),
                 );
               },
             ),
@@ -107,7 +117,10 @@ class AppDrawer extends ConsumerWidget {
               ),
               title: Text(
                 loc.logout,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               onTap: () {
                 AwesomeDialog(
@@ -118,10 +131,12 @@ class AppDrawer extends ConsumerWidget {
                   desc: loc.logout_confirmation,
                   btnCancelText: loc.cancel,
                   btnCancelOnPress: () {},
-                  btnOkText: loc.confirm,
-                  btnOkOnPress: () {
+                  btnOkText: 'Confirmar',
+                  btnOkOnPress: () async {
                     Navigator.of(context).pop();
-                    Navigator.of(context).pushReplacementNamed('/login');
+                    await logout(
+                      context,
+                    ); // Función asíncrona que debes implementar
                   },
                 ).show();
               },
@@ -129,7 +144,7 @@ class AppDrawer extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.language, color: Colors.indigo),
               title: Text(
-                (loc.change_language), // Usa tus traducciones aquí
+                loc.change_language,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -148,10 +163,28 @@ class AppDrawer extends ConsumerWidget {
                           onTap: () {
                             ref
                                 .read(localeProvider.notifier)
-                                .setLocale(Locale('es'));
+                                .setLocale(const Locale('es'));
                             Navigator.pop(context);
                           },
                         ),
                         ListTile(
                           title: const Text('English'),
-                          onTap
+                          onTap: () {
+                            ref
+                                .read(localeProvider.notifier)
+                                .setLocale(const Locale('en'));
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

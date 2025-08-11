@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+
 import 'package:intl/intl.dart' as intl;
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
