@@ -1,6 +1,6 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:practice_acount_manager/features/users/data/mock_users.dart';
+import 'package:practice_acount_manager/features/users/data/users_service.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/frm_update_user.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
@@ -14,31 +14,45 @@ class SearchTableUser extends StatefulWidget {
 }
 
 class _SearchTableUserState extends State<SearchTableUser> {
-  late UserDataSource _dataSource;
+  UserDataSource? _dataSource;
   bool _initialized = false;
   final TextEditingController _searchCtrl = TextEditingController();
+  List<User> _users = [];
 
   // Se ejecuta después de initState y cuando el contexto cambia
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      final loc = AppLocalizations.of(context)!;
+      _initialized = true;
+      _loadAndInit();
+    }
+  }
+
+  Future<void> _loadAndInit() async {
+    final resp = await getUsers('token');
+
+    final loc = AppLocalizations.of(context)!;
+    setState(() {
+      _users = resp;
       _dataSource = UserDataSource(
-        users: users,
+        users: _users,
         onEdit: _onEdit,
         onDelete: (user) => _onDelete(user, context),
         loc: loc,
       );
-      _initialized = true;
-    }
+    });
   }
 
-  void _onEdit(User u) {
-    Navigator.push(
+  void _onEdit(User u) async {
+    final edited = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => UpdateUserForm(user: u)),
     );
+
+    if (edited != null) {
+      _loadAndInit();
+    }
   }
 
   void _onDelete(User user, BuildContext context) {
@@ -52,19 +66,31 @@ class _SearchTableUserState extends State<SearchTableUser> {
       btnCancelText: loc.cancel,
       btnCancelOnPress: () {},
       btnOkText: loc.confirm,
-      btnOkOnPress: () {
-        setState(() {
-          _dataSource.delete(user);
-        });
+      btnOkOnPress: () async {
+        final resp = await deleteUser(user.id, 'token');
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('"${user.login}" ${loc.deleted}'),
-            duration: const Duration(seconds: 3),
-            backgroundColor: Colors.green,
-            elevation: 5,
-          ),
-        );
+        if (resp.statusCode == 200) {
+          _loadAndInit(); //Volver hacer la peticion
+
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('"${user.login}" ${loc.deleted}'),
+              duration: const Duration(seconds: 3),
+              backgroundColor: Colors.green,
+              elevation: 5,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error al eliminar ${resp.body}'),
+              duration: Duration(seconds: 3),
+              backgroundColor: Colors.red,
+              elevation: 5,
+            ),
+          );
+        }
       },
     ).show();
   }
@@ -77,12 +103,12 @@ class _SearchTableUserState extends State<SearchTableUser> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     // Mientras _dataSource no esté listo, muestra un loader
-    if (!_initialized) {
+    if (_dataSource == null) {
       return const Center(child: CircularProgressIndicator());
     }
-
-    final loc = AppLocalizations.of(context)!;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(10),
@@ -90,7 +116,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
         children: [
           SearchBarExample(
             onQueryChanged: (query) {
-              _dataSource.filter(query);
+              _dataSource?.filter(query);
               setState(() {});
             },
           ),
@@ -98,9 +124,9 @@ class _SearchTableUserState extends State<SearchTableUser> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: _dataSource.visibleCount,
+            itemCount: _dataSource?.visibleCount,
             itemBuilder: (context, index) {
-              final user = _dataSource.getVisibleAt(index);
+              final user = _dataSource?.getVisibleAt(index);
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 1),
                 elevation: 4,
@@ -137,7 +163,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
                                     ),
                                   ),
                                   Text(
-                                    user.login,
+                                    '${user?.login}',
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                   const SizedBox(height: 12),
@@ -150,7 +176,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
                                     ),
                                   ),
                                   Text(
-                                    user.email,
+                                    '${user?.email}',
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                   const SizedBox(height: 12),
@@ -171,7 +197,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
                                     ),
                                   ),
                                   Text(
-                                    user.maildir,
+                                    '${user?.maildir}',
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                   Text(
@@ -183,7 +209,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
                                     ),
                                   ),
                                   Text(
-                                    user.identificacion,
+                                    '${user?.identificacion}',
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                   const SizedBox(height: 12),
@@ -196,7 +222,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
                                     ),
                                   ),
                                   Text(
-                                    user.grupo,
+                                    '${user?.grupo}',
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                   const SizedBox(height: 12),
@@ -209,7 +235,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
                                     ),
                                   ),
                                   Text(
-                                    user.quota,
+                                    '${user?.quota}',
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                 ],
@@ -221,9 +247,9 @@ class _SearchTableUserState extends State<SearchTableUser> {
                       PopupMenuButton<String>(
                         onSelected: (value) {
                           if (value == 'edit') {
-                            _onEdit(user);
+                            _onEdit(user!);
                           } else if (value == 'delete') {
-                            _onDelete(user, context);
+                            _onDelete(user!, context);
                           }
                         },
                         itemBuilder: (context) => [
@@ -283,15 +309,17 @@ class UserDataSource extends DataTableSource {
 
   void filter(String query) {
     final q = query.toLowerCase().trim();
+
     if (q.isEmpty) {
       _visible = List<User>.from(_all);
     } else {
       _visible = _all.where((u) {
+        final quotaStr = u.quota.toString();
         return u.email.toLowerCase().contains(q) ||
             u.maildir.toLowerCase().contains(q) ||
             u.identificacion.toLowerCase().contains(q) ||
             u.grupo.toLowerCase().contains(q) ||
-            u.quota.toLowerCase().contains(q);
+            quotaStr.contains(q);
       }).toList();
     }
     notifyListeners();
@@ -321,7 +349,7 @@ class UserDataSource extends DataTableSource {
         DataCell(Text(u.maildir)),
         DataCell(Text(u.identificacion)),
         DataCell(Text(u.grupo)),
-        DataCell(Text(u.quota)),
+        DataCell(Text(u.quota.toString())),
         DataCell(
           PopupMenuButton<String>(
             onSelected: (value) {

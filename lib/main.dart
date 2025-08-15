@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/auth/presentation/pages/login_page_local.dart';
-import 'package:practice_acount_manager/features/auth/presentation/service/auth_Service.dart';
+import 'package:practice_acount_manager/features/auth/presentation/service/auth_service.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
 import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
@@ -24,7 +24,8 @@ Future<void> main() async {
   await authService.initialize();
 
   runApp(
-    const ProviderScope( // Necesario para Riverpod
+    const ProviderScope(
+      // Necesario para Riverpod
       child: MyApp(),
     ),
   );

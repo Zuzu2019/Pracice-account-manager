@@ -1,6 +1,6 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:practice_acount_manager/features/aliases/data/mock_aliases.dart';
+import 'package:practice_acount_manager/features/aliases/data/alias_service.dart';
 import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/frm_add_aliase.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
@@ -14,38 +14,52 @@ class SearchTableAliases extends StatefulWidget {
 }
 
 class _SearchTableAliasesState extends State<SearchTableAliases> {
-  late final AliasesDataSource _dataSource;
+  AliasesDataSource? _dataSource;
   bool _initialized = false;
-
   final TextEditingController _searchCtrl = TextEditingController();
+  List<Aliases> _aliases = [];
   //int _rowsPerPage = 9;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     if (!_initialized) {
-      final loc = AppLocalizations.of(context)!;
+      _initialized = true;
+      _loadAndInit();
+    }
+  }
+
+  Future<void> _loadAndInit() async {
+    final resp = await getAlias('token'); // Trae la lista desde backend
+    final loc = AppLocalizations.of(context)!;
+
+    setState(() {
+      _aliases = resp;
       _dataSource = AliasesDataSource(
-        alias: alias,
+        alias: _aliases,
         onEdit: _onEdit,
         onDelete: (alias) => _onDelete(alias, context),
         loc: loc,
       );
-      _initialized = true;
-    }
+    });
   }
 
-  void _onEdit(Aliases u) {
-    Navigator.push(
+  Future<void> _onEdit(Aliases u) async {
+    final edited = await Navigator.push<Aliases>(
       context,
       MaterialPageRoute(
         builder: (context) => AddAliasForm(alias: u, isEditing: true),
       ),
     );
+
+    if (edited != null) {
+      _loadAndInit();
+    }
   }
 
   void _onDelete(Aliases alias, BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+
     AwesomeDialog(
       context: context,
       dialogType: DialogType.question,
@@ -55,19 +69,30 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
       btnCancelText: loc.cancel,
       btnCancelOnPress: () {},
       btnOkText: loc.confirm,
-      btnOkOnPress: () {
-        setState(() {
-          _dataSource.delete(alias);
-        });
+      btnOkOnPress: () async {
+        final resp = await deleteAlias(alias.id, 'token');
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('"${alias.local}" ${loc.deleted}'),
-            duration: Duration(seconds: 3),
-            backgroundColor: Colors.green,
-            elevation: 5,
-          ),
-        );
+        if (resp.statusCode == 200) {
+          _loadAndInit();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('"${alias.local}" ${loc.deleted}'),
+              duration: Duration(seconds: 3),
+              backgroundColor: Colors.green,
+              elevation: 5,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error al eliminar"${resp.body}"'),
+              duration: Duration(seconds: 3),
+              backgroundColor: Colors.red,
+              elevation: 5,
+            ),
+          );
+        }
       },
     ).show();
   }
@@ -82,13 +107,16 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
 
+    if (_dataSource == null) {
+      return Center(child: CircularProgressIndicator());
+    }
     return SingleChildScrollView(
       padding: EdgeInsets.all(15),
       child: Column(
         children: [
           SearchBarExample(
             onQueryChanged: (query) {
-              _dataSource.filter(query);
+              _dataSource?.filter(query);
               setState(() {});
             },
           ),
@@ -96,9 +124,9 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
           ListView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
-            itemCount: _dataSource.visibleCount,
+            itemCount: _dataSource?.visibleCount,
             itemBuilder: (context, index) {
-              final alias = _dataSource.getVisibleAt(index);
+              final alias = _dataSource?.getVisibleAt(index);
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 1),
                 elevation: 4,
@@ -108,19 +136,19 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
                 child: ListTile(
                   leading: const Icon(Icons.person, color: Colors.blue),
                   title: Text(
-                    '${loc.localLabel}: ${alias.local}',
+                    '${loc.local_label}: ${alias?.local}',
                     style: const TextStyle(fontSize: 13),
                   ),
                   subtitle: Text(
-                    '${loc.remoteLabel}: ${alias.remoto}',
+                    '${loc.remote_label}: ${alias?.remoto}',
                     style: TextStyle(fontSize: 13),
                   ),
                   trailing: PopupMenuButton<String>(
                     onSelected: (value) {
                       if (value == 'edit') {
-                        _onEdit(alias);
+                        _onEdit(alias!);
                       } else if (value == 'delete') {
-                        _onDelete(alias, context);
+                        _onDelete(alias!, context);
                       }
                     },
                     itemBuilder: (context) => [

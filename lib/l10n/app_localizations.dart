@@ -2,9 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-
-import 'package:intl/intl.dart' as intl;
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
@@ -312,22 +311,10 @@ abstract class AppLocalizations {
   /// **'Update'**
   String get update_button;
 
-  /// No description provided for @confirm_password_label.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm password'**
-  String get confirm_password_label;
-
-  /// No description provided for @confirm_password_hint.
-  ///
-  /// In en, this message translates to:
-  /// **'Repeat your password'**
-  String get confirm_password_hint;
-
   /// No description provided for @delete_confirmation.
   ///
   /// In en, this message translates to:
-  /// **'this will be deleted. Are you sure you want to continue'**
+  /// **'This will be deleted. Are you sure you want to continue?'**
   String get delete_confirmation;
 
   /// No description provided for @edit.
@@ -342,11 +329,11 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get delete;
 
-  /// No description provided for @cancelConfirmation.
+  /// No description provided for @cancel_confirmation.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to cancel'**
-  String get cancelConfirmation;
+  /// **'Are you sure you want to cancel?'**
+  String get cancel_confirmation;
 
   /// No description provided for @list.
   ///
@@ -354,88 +341,100 @@ abstract class AppLocalizations {
   /// **'List'**
   String get list;
 
-  /// No description provided for @aliasManagement.
+  /// No description provided for @alias_management.
   ///
   /// In en, this message translates to:
-  /// **'Alias managment'**
-  String get aliasManagement;
+  /// **'Alias management'**
+  String get alias_management;
 
-  /// No description provided for @errorTitle.
+  /// No description provided for @error_title.
   ///
   /// In en, this message translates to:
   /// **'Error'**
-  String get errorTitle;
+  String get error_title;
 
-  /// No description provided for @successTitle.
+  /// No description provided for @success_title.
   ///
   /// In en, this message translates to:
   /// **'Success'**
-  String get successTitle;
+  String get success_title;
 
-  /// No description provided for @userAddedSuccessfully.
+  /// No description provided for @user_added_successfully.
   ///
   /// In en, this message translates to:
   /// **'User added successfully'**
-  String get userAddedSuccessfully;
+  String get user_added_successfully;
 
-  /// No description provided for @aliasUpdated.
+  /// No description provided for @alias_updated.
   ///
   /// In en, this message translates to:
   /// **'Alias updated'**
-  String get aliasUpdated;
+  String get alias_updated;
 
-  /// No description provided for @aliasUpdatedSuccessfully.
+  /// No description provided for @user_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'User updated'**
+  String get user_updated;
+
+  /// No description provided for @alias_updated_successfully.
   ///
   /// In en, this message translates to:
   /// **'Alias data was updated successfully.'**
-  String get aliasUpdatedSuccessfully;
+  String get alias_updated_successfully;
 
-  /// No description provided for @aliasAddedSuccessfully.
+  /// No description provided for @user_updated_successfully.
+  ///
+  /// In en, this message translates to:
+  /// **'User data was updated successfully.'**
+  String get user_updated_successfully;
+
+  /// No description provided for @alias_added_successfully.
   ///
   /// In en, this message translates to:
   /// **'Alias added successfully.'**
-  String get aliasAddedSuccessfully;
+  String get alias_added_successfully;
 
-  /// No description provided for @editAlias.
+  /// No description provided for @edit_alias.
   ///
   /// In en, this message translates to:
   /// **'Edit alias'**
-  String get editAlias;
+  String get edit_alias;
 
-  /// No description provided for @addAlias.
+  /// No description provided for @add_alias.
   ///
   /// In en, this message translates to:
   /// **'Add alias'**
-  String get addAlias;
+  String get add_alias;
 
-  /// No description provided for @localLabel.
+  /// No description provided for @local_label.
   ///
   /// In en, this message translates to:
   /// **'Local'**
-  String get localLabel;
+  String get local_label;
 
-  /// No description provided for @localAliasHint.
+  /// No description provided for @local_alias_hint.
   ///
   /// In en, this message translates to:
   /// **'Enter your local alias'**
-  String get localAliasHint;
+  String get local_alias_hint;
 
-  /// No description provided for @remoteLabel.
+  /// No description provided for @remote_label.
   ///
   /// In en, this message translates to:
   /// **'Remote'**
-  String get remoteLabel;
+  String get remote_label;
 
-  /// No description provided for @remoteAliasHint.
+  /// No description provided for @remote_alias_hint.
   ///
   /// In en, this message translates to:
   /// **'Enter your remote alias'**
-  String get remoteAliasHint;
+  String get remote_alias_hint;
 
   /// No description provided for @deleted.
   ///
   /// In en, this message translates to:
-  /// **'deleted'**
+  /// **'Deleted'**
   String get deleted;
 
   /// No description provided for @email.
@@ -444,17 +443,17 @@ abstract class AppLocalizations {
   /// **'Email'**
   String get email;
 
-  /// No description provided for @invalidEmail.
+  /// No description provided for @invalid_email.
   ///
   /// In en, this message translates to:
   /// **'Invalid email'**
-  String get invalidEmail;
+  String get invalid_email;
 
-  /// No description provided for @signIn.
+  /// No description provided for @sign_in.
   ///
   /// In en, this message translates to:
   /// **'Sign in'**
-  String get signIn;
+  String get sign_in;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

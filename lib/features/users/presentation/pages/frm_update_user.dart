@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:practice_acount_manager/features/users/data/users_service.dart'
+    show updateUser;
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_confirm_user.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_cancel.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_user_navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_user.dart';
+import 'package:practice_acount_manager/features/widgets/generals/text_form_field.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 class UpdateUserForm extends StatefulWidget {
@@ -23,10 +26,11 @@ class _AddUserFormState extends State<UpdateUserForm> {
   final _confirmPasswordController = TextEditingController();
 
   late final TextEditingController _loginController;
-  late final TextEditingController _idController;
+  late final TextEditingController _identificacionController;
   late final TextEditingController _groupController;
   late final TextEditingController _quotaController;
   late final TextEditingController _dominioController;
+  late final TextEditingController _emailController;
 
   String? _selectedDomain;
   String? dominio;
@@ -41,36 +45,99 @@ class _AddUserFormState extends State<UpdateUserForm> {
     final dominio = email.contains('@') ? email.split('@')[1] : '';
 
     _loginController = TextEditingController(text: widget.user.login);
-    _idController = TextEditingController(text: widget.user.identificacion);
+    _identificacionController = TextEditingController(
+      text: widget.user.identificacion,
+    );
     _groupController = TextEditingController(text: widget.user.grupo);
-    _quotaController = TextEditingController(text: widget.user.quota);
+    _quotaController = TextEditingController(
+      text: widget.user.quota.toString(),
+    );
     _dominioController = TextEditingController(text: dominio);
+    _emailController = TextEditingController(text: email);
+
+    _loginController.addListener(_updateEmail);
+    _dominioController.addListener(_updateEmail);
   }
 
-  void _submitForm() {
+  void _updateEmail() {
+    final login = _loginController.text.trim();
+    final dominio = _dominioController.text.trim();
+
+    if (login.isNotEmpty && dominio.isNotEmpty) {
+      _emailController.text = '$login$dominio';
+    } else {
+      _emailController.clear();
+    }
+  }
+
+  void _submitForm() async {
+    final loc = AppLocalizations.of(context)!;
+
     if (_formKey.currentState!.validate()) {
+      final user = User(
+        dominio: 1,
+        id: widget.user.id,
+        login: _loginController.text.trim(),
+        password: _passwordController.text.trim(),
+        email: _emailController.text.trim(),
+        maildir: '',
+        identificacion: _identificacionController.text.trim(),
+        grupo: _groupController.text.trim(),
+        quota: int.tryParse(_quotaController.text.trim()) ?? 0,
+      );
+
       if (_passwordController.text != _confirmPasswordController.text) {
         AwesomeDialog(
           context: context,
           dialogType: DialogType.error,
-          title: 'Error',
-          desc: 'Las contraseñas no coinciden',
+          title: loc.error_title,
+          desc: loc.password_mismatch,
           btnOkOnPress: () {},
         ).show();
         return;
       }
 
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.success,
-        animType: AnimType.rightSlide,
-        title: 'User actualizado',
-        desc: 'Usuario actualizado correctamente',
-        btnOkOnPress: () {
-          Navigator.pop(context, '');
-        },
-        btnOkColor: Colors.green,
-      ).show();
+      try {
+        final resp = await updateUser(user.id, user, 'token');
+
+        if (resp.statusCode == 200) {
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.success,
+            animType: AnimType.rightSlide,
+            title: loc.user_updated,
+            desc: loc.user_updated_successfully,
+            btnOkOnPress: () {
+              Navigator.pop(context, user);
+            },
+            btnOkColor: Colors.green,
+          ).show();
+        } else {
+          String errorMessage = resp.body.isNotEmpty
+              ? resp.body
+              : 'Error inesperado: Código ${resp.statusCode}';
+
+          await AwesomeDialog(
+            context: context,
+            dialogType: DialogType.error,
+            animType: AnimType.rightSlide,
+            title: loc.error_title,
+            desc: errorMessage,
+            btnOkOnPress: () {
+              Navigator.pop(context);
+            },
+            btnOkColor: Colors.red,
+          ).show();
+        }
+      } catch (e) {
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.error,
+          title: 'Error',
+          desc: e.toString(),
+          btnOkOnPress: () {},
+        ).show();
+      }
     }
   }
 
@@ -79,7 +146,7 @@ class _AddUserFormState extends State<UpdateUserForm> {
     _loginController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _idController.dispose();
+    _identificacionController.dispose();
     _groupController.dispose();
     _quotaController.dispose();
     super.dispose();
@@ -136,51 +203,11 @@ class _AddUserFormState extends State<UpdateUserForm> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      TextFormField(
+                      CustomTextFormField(
                         controller: _loginController,
-                        decoration: InputDecoration(
-                          labelText: loc.label_login,
-                          labelStyle: const TextStyle(
-                            color: Color.fromARGB(255, 25, 0, 255),
-                            fontWeight: FontWeight.bold,
-                          ),
-                          hintText: loc.hint_login,
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          prefixIcon: const Icon(
-                            Icons.person,
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        ),
+                        label: loc.label_login,
+                        hint: loc.hint_login,
+                        icon: Icons.person,
                         validator: (value) => value == null || value.isEmpty
                             ? loc.field_required
                             : null,
@@ -200,102 +227,23 @@ class _AddUserFormState extends State<UpdateUserForm> {
                       ),
                       const SizedBox(height: 16),
 
-                      TextFormField(
-                        controller: _idController,
-                        decoration: InputDecoration(
-                          labelText: loc.label_id,
-                          labelStyle: const TextStyle(
-                            color: Color.fromARGB(255, 25, 0, 255),
-                            fontWeight: FontWeight.bold,
-                          ),
-                          hintText: loc.hint_id,
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          prefixIcon: const Icon(
-                            Icons.verified_user,
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        ),
+                      CustomTextFormField(
+                        controller: _identificacionController,
+                        label: loc.label_id,
+                        hint: loc.hint_id,
+                        icon: Icons.verified_user,
                         validator: (value) => value == null || value.isEmpty
                             ? loc.field_required
                             : null,
                       ),
+
                       const SizedBox(height: 16),
 
-                      TextFormField(
+                      CustomTextFormField(
                         controller: _groupController,
-                        decoration: InputDecoration(
-                          labelText: loc.label_group,
-                          labelStyle: const TextStyle(
-                            color: Color.fromARGB(255, 25, 0, 255),
-                            fontWeight: FontWeight.bold,
-                          ),
-                          hintText: loc.hint_group,
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          prefixIcon: const Icon(
-                            Icons.group,
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        ),
+                        label: loc.label_group,
+                        hint: loc.hint_group,
+                        icon: Icons.group,
                         validator: (value) => value == null || value.isEmpty
                             ? loc.field_required
                             : null,
@@ -360,6 +308,14 @@ class _AddUserFormState extends State<UpdateUserForm> {
                             value: 'ejemplo.com',
                             child: Text('ejemplo.com'),
                           ),
+                          DropdownMenuItem(
+                            value: 'prueba2.com',
+                            child: Text('prueba2.com'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'email.com',
+                            child: Text('email.com'),
+                          ),
                         ],
                         onChanged: (value) {
                           setState(() {
@@ -371,57 +327,32 @@ class _AddUserFormState extends State<UpdateUserForm> {
                       ),
 
                       const SizedBox(height: 16),
-                      TextFormField(
+
+                      CustomTextFormField(
                         controller: _quotaController,
-                        decoration: InputDecoration(
-                          labelText: loc.label_quota,
-                          labelStyle: const TextStyle(
-                            color: Color.fromARGB(255, 25, 0, 255),
-                            fontWeight: FontWeight.bold,
-                          ),
-                          hintText: loc.hint_quota,
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          prefixIcon: const Icon(
-                            Icons.storage,
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        ),
+                        label: loc.label_quota,
+                        hint: loc.hint_quota,
+                        icon: Icons.storage,
+                        keyboardType: TextInputType.number,
                         validator: (value) => value == null || value.isEmpty
                             ? loc.field_required
                             : null,
                       ),
 
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
+
+                      CustomTextFormField(
+                        controller: _emailController,
+                        label: loc.email,
+                        hint: '',
+                        icon: Icons.email,
+                        readOnly: true,
+                        validator: (value) => value == null || value.isEmpty
+                            ? loc.field_required
+                            : null,
+                      ),
+
+                      const SizedBox(height: 30),
 
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,

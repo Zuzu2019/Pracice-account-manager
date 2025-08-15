@@ -2,5 +2,18 @@
 class Aliases {
   final String local;
   final String remoto;
-  Aliases({required this.local, required this.remoto});
+  final int id;
+  Aliases({required this.id, required this.local, required this.remoto});
+
+  factory Aliases.fromJson(Map<String, dynamic> json) {
+    return Aliases(
+      id: json['ID'] != null ? int.parse(json['ID'].toString()) : 0,
+      local: json['Local']?.toString() ?? '',
+      remoto: json['Remoto']?.toString() ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'local': local, 'remoto': remoto, 'id': id};
+  }
 }

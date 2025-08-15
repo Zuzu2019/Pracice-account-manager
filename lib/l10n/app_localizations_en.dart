@@ -117,13 +117,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get update_button => 'Update';
 
   @override
-  String get confirm_password_label => 'Confirm password';
-
-  @override
-  String get confirm_password_hint => 'Repeat your password';
-
-  @override
-  String get delete_confirmation => 'this will be deleted. Are you sure you want to continue';
+  String get delete_confirmation => 'This will be deleted. Are you sure you want to continue?';
 
   @override
   String get edit => 'Edit';
@@ -132,59 +126,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delete => 'Delete';
 
   @override
-  String get cancelConfirmation => 'Are you sure you want to cancel';
+  String get cancel_confirmation => 'Are you sure you want to cancel?';
 
   @override
   String get list => 'List';
 
   @override
-  String get aliasManagement => 'Alias managment';
+  String get alias_management => 'Alias management';
 
   @override
-  String get errorTitle => 'Error';
+  String get error_title => 'Error';
 
   @override
-  String get successTitle => 'Success';
+  String get success_title => 'Success';
 
   @override
-  String get userAddedSuccessfully => 'User added successfully';
+  String get user_added_successfully => 'User added successfully';
 
   @override
-  String get aliasUpdated => 'Alias updated';
+  String get alias_updated => 'Alias updated';
 
   @override
-  String get aliasUpdatedSuccessfully => 'Alias data was updated successfully.';
+  String get user_updated => 'User updated';
 
   @override
-  String get aliasAddedSuccessfully => 'Alias added successfully.';
+  String get alias_updated_successfully => 'Alias data was updated successfully.';
 
   @override
-  String get editAlias => 'Edit alias';
+  String get user_updated_successfully => 'User data was updated successfully.';
 
   @override
-  String get addAlias => 'Add alias';
+  String get alias_added_successfully => 'Alias added successfully.';
 
   @override
-  String get localLabel => 'Local';
+  String get edit_alias => 'Edit alias';
 
   @override
-  String get localAliasHint => 'Enter your local alias';
+  String get add_alias => 'Add alias';
 
   @override
-  String get remoteLabel => 'Remote';
+  String get local_label => 'Local';
 
   @override
-  String get remoteAliasHint => 'Enter your remote alias';
+  String get local_alias_hint => 'Enter your local alias';
 
   @override
-  String get deleted => 'deleted';
+  String get remote_label => 'Remote';
+
+  @override
+  String get remote_alias_hint => 'Enter your remote alias';
+
+  @override
+  String get deleted => 'Deleted';
 
   @override
   String get email => 'Email';
 
   @override
-  String get invalidEmail => 'Invalid email';
+  String get invalid_email => 'Invalid email';
 
   @override
-  String get signIn => 'Sign in';
+  String get sign_in => 'Sign in';
 }

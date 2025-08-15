@@ -68,7 +68,7 @@ class _LoginFormState extends State<LoginForm> {
                 return loc.field_required;
               }
               if (!value.contains('@')) {
-                return loc.invalidEmail;
+                return loc.invalid_email;
               }
               return null;
             },
@@ -124,7 +124,7 @@ class _LoginFormState extends State<LoginForm> {
               // style: ElevatedButton.styleFrom(
               //   padding: const EdgeInsets.symmetric(vertical: 14),
               // ),
-              child: Text(loc.signIn, style: TextStyle(fontSize: 16)),
+              child: Text(loc.sign_in, style: TextStyle(fontSize: 16)),
             ),
           ),
         ],

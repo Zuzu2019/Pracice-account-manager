@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:practice_acount_manager/features/users/data/users_service.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_confirm_user.dart';
+import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_cancel.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_user_navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_user.dart';
+import 'package:practice_acount_manager/features/widgets/generals/text_form_field.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 class AddUserForm extends StatefulWidget {
@@ -19,13 +22,15 @@ class _AddUserFormState extends State<AddUserForm> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  //late final TextEditingController _passwordCotroller;
   late final TextEditingController _loginController;
-  late final TextEditingController _idController;
+  late final TextEditingController _identificacionController;
   late final TextEditingController _groupController;
   late final TextEditingController _quotaController;
   late final TextEditingController _dominioController;
 
-  String? _selectedDomain;
+  late final TextEditingController _emailController;
+
   String? dominio;
 
   @override
@@ -34,44 +39,94 @@ class _AddUserFormState extends State<AddUserForm> {
 
     // Nueva inserción: campos vacíos
     _loginController = TextEditingController();
-    _idController = TextEditingController();
+    _identificacionController = TextEditingController();
     _groupController = TextEditingController();
     _quotaController = TextEditingController();
     _dominioController = TextEditingController();
+    _emailController = TextEditingController();
+
+    _loginController.addListener(_updateEmail);
+    _dominioController.addListener(_updateEmail);
   }
 
-  void _submitForm(BuildContext context) {
+  //Para que se actualice el campo de email
+  void _updateEmail() {
+    final login = _loginController.text.trim();
+    final dominio = _dominioController.text.trim();
+
+    if (login.isNotEmpty && dominio.isNotEmpty) {
+      _emailController.text = '$login$dominio';
+    } else {
+      _emailController.clear();
+    }
+  }
+
+  void _submitForm(BuildContext context) async {
     final loc = AppLocalizations.of(context)!;
 
     if (_formKey.currentState!.validate()) {
+      final userAdd = User(
+        dominio: 0,
+        id: 0,
+        login: _loginController.text.trim(),
+        password: _passwordController.text.trim(),
+        email: _emailController.text.trim(),
+        maildir: '/prueba',
+        identificacion: _identificacionController.text.trim(),
+        grupo: _groupController.text.trim(),
+        quota: int.tryParse(_quotaController.text.trim()) ?? 0,
+      );
+
       if (_passwordController.text != _confirmPasswordController.text) {
         AwesomeDialog(
           context: context,
           dialogType: DialogType.error,
-          title: loc.errorTitle,
+          title: loc.error_title,
           desc: loc.password_mismatch,
           btnOkOnPress: () {},
         ).show();
         return;
       }
 
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.success,
-        title: loc.successTitle,
-        desc: loc.userAddedSuccessfully,
-        btnOkOnPress: () {
-          _formKey.currentState!.reset();
-          _loginController.clear();
-          _passwordController.clear();
-          _confirmPasswordController.clear();
-          _idController.clear();
-          _groupController.clear();
-          _quotaController.clear();
-          setState(() => _selectedDomain = null);
-        },
-        btnOkColor: Colors.green,
-      ).show();
+      try {
+        final resp = await saveUser(userAdd, 'token');
+
+        if (resp.statusCode == 200) {
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.success,
+            title: loc.success_title,
+            desc: loc.user_added_successfully,
+            btnOkOnPress: () {
+              _formKey.currentState!.reset();
+              _loginController.clear();
+              _passwordController.clear();
+              _confirmPasswordController.clear();
+              _identificacionController.clear();
+              _groupController.clear();
+              _quotaController.clear();
+            },
+            btnOkColor: Colors.green,
+          ).show();
+        } else {
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.error,
+            title: loc.error_title,
+            desc: resp.body,
+            btnOkOnPress: () {},
+            btnOkColor: Colors.red,
+          ).show();
+        }
+      } catch (e) {
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.error,
+          title: loc.error_title,
+          desc: e.toString(),
+          btnOkOnPress: () {},
+        ).show();
+      }
     }
   }
 
@@ -80,16 +135,15 @@ class _AddUserFormState extends State<AddUserForm> {
     _loginController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _idController.dispose();
+    _identificacionController.dispose();
     _groupController.dispose();
     _quotaController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final title = 'Agregar usuario';
-
     final loc = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
@@ -136,56 +190,13 @@ class _AddUserFormState extends State<AddUserForm> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      TextFormField(
+                      CustomTextFormField(
                         controller: _loginController,
-                        decoration: InputDecoration(
-                          //labelText: 'Login',
-                          //labelText:.label_login,
-                          labelStyle: const TextStyle(
-                            color: Color.fromARGB(255, 25, 0, 255),
-                            fontWeight: FontWeight.bold,
-                          ),
-                          hintText: loc.hint_login, // Usar la localización
-                          //hintText: 'Escribe tu usuario',
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          prefixIcon: const Icon(
-                            Icons.person,
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        ),
+                        label: loc.label_login,
+                        hint: loc.hint_login,
+                        icon: Icons.person,
                         validator: (value) => value == null || value.isEmpty
-                            ? loc
-                                  .field_required //'Campo obligatorio'
+                            ? loc.field_required
                             : null,
                       ),
 
@@ -203,106 +214,25 @@ class _AddUserFormState extends State<AddUserForm> {
                       ),
                       const SizedBox(height: 16),
 
-                      TextFormField(
-                        controller: _idController,
-                        decoration: InputDecoration(
-                          labelText: loc.label_id, //'Identificador',
-                          labelStyle: const TextStyle(
-                            color: Color.fromARGB(255, 25, 0, 255),
-                            fontWeight: FontWeight.bold,
-                          ),
-                          hintText: loc.hint_id, //'Escribe el ID del usuario',
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          prefixIcon: const Icon(
-                            Icons.verified_user,
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        ),
+                      CustomTextFormField(
+                        controller: _identificacionController,
+                        label: loc.label_id,
+                        hint: loc.hint_id,
+                        icon: Icons.verified_user,
                         validator: (value) => value == null || value.isEmpty
-                            ? loc
-                                  .field_required //'Campo obligatorio'
+                            ? loc.field_required
                             : null,
                       ),
+
                       const SizedBox(height: 16),
 
-                      TextFormField(
+                      CustomTextFormField(
                         controller: _groupController,
-                        decoration: InputDecoration(
-                          labelText: loc.label_group, //'Grupo',
-                          labelStyle: const TextStyle(
-                            color: Color.fromARGB(255, 25, 0, 255),
-                            fontWeight: FontWeight.bold,
-                          ),
-                          hintText: loc.hint_group, //'Ingrese el grupo',
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          prefixIcon: const Icon(
-                            Icons.group,
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        ),
+                        label: loc.label_group,
+                        hint: loc.hint_group,
+                        icon: Icons.group,
                         validator: (value) => value == null || value.isEmpty
-                            ? loc
-                                  .field_required //'Campo obligatorio'
+                            ? loc.field_required
                             : null,
                       ),
 
@@ -359,17 +289,18 @@ class _AddUserFormState extends State<AddUserForm> {
                         //value: _dominioController.text,
                         items: const [
                           DropdownMenuItem(
-                            value: 'example.com',
+                            value: '@example.com',
                             child: Text('example.com'),
                           ),
                           DropdownMenuItem(
-                            value: 'ejemplo.com',
+                            value: '@ejemplo.com',
                             child: Text('ejemplo.com'),
                           ),
                         ],
                         onChanged: (value) {
                           setState(() {
-                            _selectedDomain = value;
+                            _dominioController.text =
+                                value ?? ''; // 🔹 Actualiza el controller
                           });
                         },
                         validator: (value) =>
@@ -377,58 +308,32 @@ class _AddUserFormState extends State<AddUserForm> {
                       ),
 
                       const SizedBox(height: 16),
-                      TextFormField(
+
+                      CustomTextFormField(
                         controller: _quotaController,
-                        decoration: InputDecoration(
-                          labelText: loc.label_quota, //'Quota',
-                          labelStyle: const TextStyle(
-                            color: Color.fromARGB(255, 25, 0, 255),
-                            fontWeight: FontWeight.bold,
-                          ),
-                          hintText: loc.hint_quota, //'Ingresa la cuota',
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          prefixIcon: const Icon(
-                            Icons.storage,
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        ),
+                        label: loc.label_quota,
+                        hint: loc.hint_quota,
+                        icon: Icons.storage,
+                        keyboardType: TextInputType.number,
                         validator: (value) => value == null || value.isEmpty
-                            ? loc
-                                  .field_required //'Campo obligatorio'
+                            ? loc.field_required
                             : null,
                       ),
 
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
+
+                      CustomTextFormField(
+                        controller: _emailController,
+                        label: loc.email,
+                        hint: '',
+                        icon: Icons.email,
+                        readOnly: true,
+                        validator: (value) => value == null || value.isEmpty
+                            ? loc.field_required
+                            : null,
+                      ),
+
+                      const SizedBox(height: 30),
 
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,

@@ -36,14 +36,14 @@ class _ButtonOptionsAliaseState extends State<ButtonOptionsAliase> {
                   context,
                   MaterialPageRoute(
                     builder: (_) => AddAliasForm(
-                      alias: Aliases(local: '', remoto: ''),
+                      alias: Aliases(local: '', remoto: '', id: 0),
                       isEditing: false,
                     ),
                   ),
                 );
               },
               icon: const Icon(Icons.person_add),
-              label: Text(loc.addAlias),
+              label: Text(loc.add_alias),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _selectedAction == ButtonAction.addAliase
                     ? const Color.fromARGB(255, 0, 100, 255)

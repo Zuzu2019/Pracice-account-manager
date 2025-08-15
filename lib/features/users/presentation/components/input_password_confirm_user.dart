@@ -39,7 +39,7 @@ class _ConfirmPasswordFieldState extends State<ConfirmPasswordField> {
           color: Color.fromARGB(255, 25, 0, 255),
           fontWeight: FontWeight.bold,
         ),
-        hintText: loc.confirm_password_hint,
+        hintText: loc.hint_confirm_password,
         hintStyle: const TextStyle(color: Colors.grey),
         prefixIcon: const Icon(Icons.lock, color: Color.fromARGB(255, 0, 0, 0)),
         suffixIcon: IconButton(
