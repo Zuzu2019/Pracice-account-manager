@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:practice_acount_manager/features/users/data/users_service.dart'
-    show updateUser;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:practice_acount_manager/features/users/data/users_service.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_confirm_user.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_cancel.dart';
@@ -10,20 +10,22 @@ import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_user.dart';
 import 'package:practice_acount_manager/features/widgets/generals/text_form_field.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
+import 'package:practice_acount_manager/riverpod/auth_provider.dart';
 
-class UpdateUserForm extends StatefulWidget {
+class UpdateUserForm extends ConsumerStatefulWidget {
   final User user;
 
   const UpdateUserForm({super.key, required this.user});
 
   @override
-  State<UpdateUserForm> createState() => _AddUserFormState();
+  ConsumerState<UpdateUserForm> createState() => _AddUserFormState();
 }
 
-class _AddUserFormState extends State<UpdateUserForm> {
+class _AddUserFormState extends ConsumerState<UpdateUserForm> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  late final accessToken = ref.read(authProvider).accessToken;
 
   late final TextEditingController _loginController;
   late final TextEditingController _identificacionController;
@@ -98,7 +100,7 @@ class _AddUserFormState extends State<UpdateUserForm> {
       }
 
       try {
-        final resp = await updateUser(user.id, user, 'token');
+        final resp = await updateUser(user.id, user, accessToken);
 
         if (resp.statusCode == 200) {
           AwesomeDialog(
@@ -139,6 +141,14 @@ class _AddUserFormState extends State<UpdateUserForm> {
         ).show();
       }
     }
+  }
+
+  void _getDominios() async {
+    try {
+      final resp = await getDominios(accessToken);
+
+      print(resp);
+    } catch (e) {}
   }
 
   @override

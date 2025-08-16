@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:practice_acount_manager/features/aliases/data/alias_service.dart';
 import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_aliase_navigation.dart';
@@ -7,21 +8,23 @@ import 'package:practice_acount_manager/features/widgets/generals/button_cancel.
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
 import 'package:practice_acount_manager/features/widgets/generals/text_form_field.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
+import 'package:practice_acount_manager/riverpod/auth_provider.dart';
 
-class AddAliasForm extends StatefulWidget {
+class AddAliasForm extends ConsumerStatefulWidget {
   final Aliases alias;
   final bool isEditing;
 
   const AddAliasForm({super.key, required this.alias, this.isEditing = false});
   @override
-  State<AddAliasForm> createState() => _AddAliasFormState();
+  ConsumerState<AddAliasForm> createState() => _AddAliasFormState();
 }
 
-class _AddAliasFormState extends State<AddAliasForm> {
+class _AddAliasFormState extends ConsumerState<AddAliasForm> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _localController;
   late final TextEditingController _remotoController;
   late final TextEditingController _idController;
+  late final accessToken = ref.read(authProvider).accessToken;
 
   void initState() {
     super.initState();
@@ -43,7 +46,7 @@ class _AddAliasFormState extends State<AddAliasForm> {
 
       if (widget.isEditing) {
         try {
-          final resp = await updateAlias(id, updateAliases, 'token');
+          final resp = await updateAlias(id, updateAliases, accessToken);
 
           if (resp.statusCode == 200 || resp.statusCode == 201) {
             await AwesomeDialog(
@@ -88,7 +91,7 @@ class _AddAliasFormState extends State<AddAliasForm> {
           ).show();
         }
       } else {
-        final resp = await saveAlias(updateAliases, 'token');
+        final resp = await saveAlias(updateAliases, accessToken);
 
         if (resp.statusCode == 200) {
           AwesomeDialog(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:practice_acount_manager/features/users/data/users_service.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_confirm_user.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
@@ -9,18 +10,20 @@ import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_user.dart';
 import 'package:practice_acount_manager/features/widgets/generals/text_form_field.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
+import 'package:practice_acount_manager/riverpod/auth_provider.dart';
 
-class AddUserForm extends StatefulWidget {
+class AddUserForm extends ConsumerStatefulWidget {
   const AddUserForm({super.key});
 
   @override
-  State<AddUserForm> createState() => _AddUserFormState();
+  ConsumerState<AddUserForm> createState() => _AddUserFormState();
 }
 
-class _AddUserFormState extends State<AddUserForm> {
+class _AddUserFormState extends ConsumerState<AddUserForm> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  late final accessToken = ref.read(authProvider).accessToken;
 
   //late final TextEditingController _passwordCotroller;
   late final TextEditingController _loginController;
@@ -89,7 +92,7 @@ class _AddUserFormState extends State<AddUserForm> {
       }
 
       try {
-        final resp = await saveUser(userAdd, 'token');
+        final resp = await saveUser(userAdd, accessToken);
 
         if (resp.statusCode == 200) {
           AwesomeDialog(

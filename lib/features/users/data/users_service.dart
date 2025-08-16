@@ -6,7 +6,10 @@ import 'package:practice_acount_manager/features/users/presentation/models/users
 Future<List<User>> getUsers(String? token) async {
   final response = await http.get(
     Uri.parse('http://192.168.100.189:7000/users'),
-    // headers si necesitas usar token
+    headers: {
+      'Accept': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    },
   );
 
   if (response.statusCode == 200 || response.statusCode == 201) {
@@ -55,4 +58,21 @@ Future<http.Response> deleteUser(int id, String? token) async {
   );
 
   return response;
+}
+
+Future<List> getDominios(String? token) async {
+  final response = await http.get(
+    Uri.parse('http://192.168.100.189:7000/transports'),
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    },
+  );
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    final List<dynamic> jsonList = jsonDecode(response.body);
+    return jsonList;
+  } else {
+    throw Exception('Error al obtener alias');
+  }
 }

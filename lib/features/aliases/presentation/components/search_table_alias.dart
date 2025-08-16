@@ -1,24 +1,28 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:practice_acount_manager/features/aliases/data/alias_service.dart';
 import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/frm_add_aliase.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
+import 'package:practice_acount_manager/riverpod/auth_provider.dart';
 
-class SearchTableAliases extends StatefulWidget {
+class SearchTableAliases extends ConsumerStatefulWidget {
   const SearchTableAliases({super.key});
 
   @override
-  State<SearchTableAliases> createState() => _SearchTableAliasesState();
+  ConsumerState<SearchTableAliases> createState() => _SearchTableAliasesState();
 }
 
-class _SearchTableAliasesState extends State<SearchTableAliases> {
+class _SearchTableAliasesState extends ConsumerState<SearchTableAliases> {
   AliasesDataSource? _dataSource;
   bool _initialized = false;
-  final TextEditingController _searchCtrl = TextEditingController();
   List<Aliases> _aliases = [];
-  //int _rowsPerPage = 9;
+
+  final TextEditingController _searchCtrl = TextEditingController();
+  late final accessToken = ref.read(authProvider).accessToken;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -30,7 +34,7 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
   }
 
   Future<void> _loadAndInit() async {
-    final resp = await getAlias('token'); // Trae la lista desde backend
+    final resp = await getAlias(accessToken); // Trae la lista desde backend
     final loc = AppLocalizations.of(context)!;
 
     setState(() {
@@ -70,7 +74,7 @@ class _SearchTableAliasesState extends State<SearchTableAliases> {
       btnCancelOnPress: () {},
       btnOkText: loc.confirm,
       btnOkOnPress: () async {
-        final resp = await deleteAlias(alias.id, 'token');
+        final resp = await deleteAlias(alias.id, accessToken);
 
         if (resp.statusCode == 200) {
           _loadAndInit();

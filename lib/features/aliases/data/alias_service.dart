@@ -5,7 +5,10 @@ import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 Future<List<Aliases>> getAlias(String? token) async {
   final response = await http.get(
     Uri.parse('http://192.168.100.189:7000/aliases'),
-    // headers si necesitas usar token
+    headers: {
+      'Accept': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    },
   );
 
   if (response.statusCode == 200 || response.statusCode == 201) {

@@ -1,22 +1,28 @@
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
+
 import 'package:practice_acount_manager/features/users/data/users_service.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/frm_update_user.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
-import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
-class SearchTableUser extends StatefulWidget {
+import '../../../../riverpod/auth_provider.dart';
+
+class SearchTableUser extends ConsumerStatefulWidget {
   const SearchTableUser({super.key});
 
   @override
-  State<SearchTableUser> createState() => _SearchTableUserState();
+  ConsumerState<SearchTableUser> createState() => _SearchTableUserState();
 }
 
-class _SearchTableUserState extends State<SearchTableUser> {
+class _SearchTableUserState extends ConsumerState<SearchTableUser> {
+  late final accessToken = ref.read(authProvider).accessToken;
+  final TextEditingController _searchCtrl = TextEditingController();
+
   UserDataSource? _dataSource;
   bool _initialized = false;
-  final TextEditingController _searchCtrl = TextEditingController();
   List<User> _users = [];
 
   // Se ejecuta después de initState y cuando el contexto cambia
@@ -30,7 +36,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
   }
 
   Future<void> _loadAndInit() async {
-    final resp = await getUsers('token');
+    final resp = await getUsers(accessToken);
 
     final loc = AppLocalizations.of(context)!;
     setState(() {
@@ -67,7 +73,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
       btnCancelOnPress: () {},
       btnOkText: loc.confirm,
       btnOkOnPress: () async {
-        final resp = await deleteUser(user.id, 'token');
+        final resp = await deleteUser(user.id, accessToken);
 
         if (resp.statusCode == 200) {
           _loadAndInit(); //Volver hacer la peticion

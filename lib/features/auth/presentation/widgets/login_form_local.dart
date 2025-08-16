@@ -1,16 +1,22 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+import 'package:practice_acount_manager/features/auth/presentation/service/auth_service_local.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
 import 'package:practice_acount_manager/features/widgets/generals/home.dart';
 import 'package:practice_acount_manager/main.dart' hide HomePage;
+import 'package:practice_acount_manager/riverpod/auth_provider.dart';
 
-class LoginForm extends StatefulWidget {
+class LoginForm extends ConsumerStatefulWidget {
   const LoginForm({super.key});
 
   @override
-  State<LoginForm> createState() => _LoginFormState();
+  ConsumerState<LoginForm> createState() => _LoginFormState();
 }
 
-class _LoginFormState extends State<LoginForm> {
+class _LoginFormState extends ConsumerState<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
@@ -24,20 +30,33 @@ class _LoginFormState extends State<LoginForm> {
     super.dispose();
   }
 
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: lógica de autenticación
+  void _submit() async {
+    final authNotifier = ref.read(authProvider.notifier);
 
-      print(_emailCtrl.text);
-      print(_passCtrl.text);
+    try {
+      final resp = await login(_emailCtrl.text, _passCtrl.text);
 
-      Navigator.push(
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body) as Map<String, dynamic>;
+
+        authNotifier.setTokens(
+          accessToken: data['access_token'],
+          refreshToken: data['refresh_token'],
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed: ${resp.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
-      // ScaffoldMessenger.of(
-      //   context,
-      // ).showSnackBar(const SnackBar(content: Text('Iniciando sesión...')));
+      ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
     }
   }
 
@@ -67,9 +86,9 @@ class _LoginFormState extends State<LoginForm> {
               if (value == null || value.isEmpty) {
                 return loc.field_required;
               }
-              if (!value.contains('@')) {
-                return loc.invalid_email;
-              }
+              // if (!value.contains('@')) {
+              //   return loc.invalid_email;
+              // }
               return null;
             },
           ),
