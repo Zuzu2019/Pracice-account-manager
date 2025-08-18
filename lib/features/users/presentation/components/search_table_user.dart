@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:practice_acount_manager/features/users/provider/user_provider.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 import 'package:practice_acount_manager/features/users/data/users_service.dart';
@@ -29,35 +30,17 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_initialized) {
-      _initialized = true;
-      _loadAndInit();
-    }
-  }
-
-  Future<void> _loadAndInit() async {
-    final resp = await getUsers(accessToken);
-
-    final loc = AppLocalizations.of(context)!;
-    setState(() {
-      _users = resp;
-      _dataSource = UserDataSource(
-        users: _users,
-        onEdit: _onEdit,
-        onDelete: (user) => _onDelete(user, context),
-        loc: loc,
-      );
-    });
   }
 
   void _onEdit(User u) async {
+    //updateUserPassword(2, accessToken);
     final edited = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => UpdateUserForm(user: u)),
     );
 
     if (edited != null) {
-      _loadAndInit();
+      //_loadAndInit();
     }
   }
 
@@ -73,30 +56,35 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
       btnCancelOnPress: () {},
       btnOkText: loc.confirm,
       btnOkOnPress: () async {
-        final resp = await deleteUser(user.id, accessToken);
+        //final resp = await deleteUser(user.id, accessToken);
+        final result = ref.watch(deleteUserProvider(user.id));
 
-        if (resp.statusCode == 200) {
-          _loadAndInit(); //Volver hacer la peticion
-
-          // ignore: use_build_context_synchronously
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('"${user.login}" ${loc.deleted}'),
-              duration: const Duration(seconds: 3),
-              backgroundColor: Colors.green,
-              elevation: 5,
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error al eliminar ${resp.body}'),
-              duration: Duration(seconds: 3),
-              backgroundColor: Colors.red,
-              elevation: 5,
-            ),
-          );
-        }
+        result.when(
+          data: (resp) {
+            if (resp.statusCode == 200) {
+              ref.refresh(usersProvider);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('"${user.login}" ${loc.deleted}'),
+                  duration: const Duration(seconds: 3),
+                  backgroundColor: Colors.green,
+                  elevation: 5,
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Error al eliminar ${resp.body}'),
+                  duration: Duration(seconds: 3),
+                  backgroundColor: Colors.red,
+                  elevation: 5,
+                ),
+              );
+            }
+          },
+          loading: () => CircularProgressIndicator(),
+          error: (error, _) => Text('Error: $error'),
+        );
       },
     ).show();
   }
@@ -110,186 +98,203 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    final userAsync = ref.watch(usersProvider);
+    //final users = ref.watch(usersProvider);
 
-    // Mientras _dataSource no esté listo, muestra un loader
-    if (_dataSource == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    return userAsync.when(
+      data: (users) {
+        final query = ref.watch(searchQueryProvider);
+        final filteredUsers = query.isEmpty
+            ? users
+            : users
+                  .where(
+                    (u) =>
+                        u.login.toLowerCase().contains(query.toLowerCase()) ||
+                        u.email.toLowerCase().contains(query.toLowerCase()),
+                  )
+                  .toList();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        children: [
-          SearchBarExample(
-            onQueryChanged: (query) {
-              _dataSource?.filter(query);
-              setState(() {});
-            },
-          ),
-          const SizedBox(height: 16),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _dataSource?.visibleCount,
-            itemBuilder: (context, index) {
-              final user = _dataSource?.getVisibleAt(index);
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 1),
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const CircleAvatar(
-                                    radius: 40,
-                                    backgroundImage: NetworkImage(
-                                      'https://st4.depositphotos.com/11574170/25191/v/450/depositphotos_251916955-stock-illustration-user-glyph-color-icon.jpg',
-                                    ),
-                                    backgroundColor: Colors.grey,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    loc.label_login,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${user?.login}',
-                                    style: const TextStyle(fontSize: 13),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    loc.email,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${user?.email}',
-                                    style: const TextStyle(fontSize: 13),
-                                  ),
-                                  const SizedBox(height: 12),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 30),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Maildir',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${user?.maildir}',
-                                    style: const TextStyle(fontSize: 13),
-                                  ),
-                                  Text(
-                                    loc.label_id,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${user?.identificacion}',
-                                    style: const TextStyle(fontSize: 13),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    loc.label_group,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${user?.grupo}',
-                                    style: const TextStyle(fontSize: 13),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    loc.label_quota,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${user?.quota}',
-                                    style: const TextStyle(fontSize: 13),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      PopupMenuButton<String>(
-                        onSelected: (value) {
-                          if (value == 'edit') {
-                            _onEdit(user!);
-                          } else if (value == 'delete') {
-                            _onDelete(user!, context);
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            value: 'edit',
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [
+              SearchBarExample(
+                onQueryChanged: (query) =>
+                    ref.read(searchQueryProvider.notifier).state = query,
+              ),
+              const SizedBox(height: 16),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: filteredUsers.length,
+                itemBuilder: (context, index) {
+                  final user = filteredUsers[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 1,
+                    ),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(width: 10),
+                          Expanded(
                             child: Row(
                               children: [
-                                Icon(Icons.edit, color: Colors.blue),
-                                const SizedBox(width: 8),
-                                Text(loc.edit),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const CircleAvatar(
+                                        radius: 40,
+                                        backgroundImage: NetworkImage(
+                                          'https://st4.depositphotos.com/11574170/25191/v/450/depositphotos_251916955-stock-illustration-user-glyph-color-icon.jpg',
+                                        ),
+                                        backgroundColor: Colors.grey,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        loc.label_login,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${user?.login}',
+                                        style: const TextStyle(fontSize: 13),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        loc.email,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${user?.email}',
+                                        style: const TextStyle(fontSize: 13),
+                                      ),
+                                      const SizedBox(height: 12),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 30),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Maildir',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${user?.maildir}',
+                                        style: const TextStyle(fontSize: 13),
+                                      ),
+                                      Text(
+                                        loc.label_id,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${user?.identificacion}',
+                                        style: const TextStyle(fontSize: 13),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        loc.label_group,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${user?.grupo}',
+                                        style: const TextStyle(fontSize: 13),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        loc.label_quota,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${user?.quota}',
+                                        style: const TextStyle(fontSize: 13),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                          PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              children: [
-                                Icon(Icons.delete, color: Colors.red),
-                                const SizedBox(width: 8),
-                                Text(loc.delete),
-                              ],
-                            ),
+                          PopupMenuButton<String>(
+                            onSelected: (value) {
+                              if (value == 'edit') {
+                                _onEdit(user!);
+                              } else if (value == 'delete') {
+                                _onDelete(user!, context);
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: 'edit',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit, color: Colors.blue),
+                                    const SizedBox(width: 8),
+                                    Text(loc.edit),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete, color: Colors.red),
+                                    const SizedBox(width: 8),
+                                    Text(loc.delete),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            icon: const Icon(Icons.more_vert),
                           ),
                         ],
-                        icon: const Icon(Icons.more_vert),
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
+      loading: () => Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(child: Text('Error: $error')),
     );
   }
 }

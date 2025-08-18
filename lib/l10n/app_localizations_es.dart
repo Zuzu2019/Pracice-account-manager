@@ -187,4 +187,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sign_in => 'Ingresar';
+
+  @override
+  String get old_password => 'Contraseña anterior';
+
+  @override
+  String get new_password => 'Contraseña nueva';
 }

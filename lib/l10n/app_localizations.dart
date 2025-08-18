@@ -454,6 +454,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in'**
   String get sign_in;
+
+  /// No description provided for @old_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Old password'**
+  String get old_password;
+
+  /// No description provided for @new_password.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get new_password;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

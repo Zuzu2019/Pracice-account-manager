@@ -187,4 +187,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sign_in => 'Sign in';
+
+  @override
+  String get old_password => 'Old password';
+
+  @override
+  String get new_password => 'New password';
 }

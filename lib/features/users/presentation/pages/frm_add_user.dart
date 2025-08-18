@@ -35,6 +35,8 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
   late final TextEditingController _emailController;
 
   String? dominio;
+  List listDominios = [];
+  String? _selectedDomain;
 
   @override
   void initState() {
@@ -50,6 +52,8 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
 
     _loginController.addListener(_updateEmail);
     _dominioController.addListener(_updateEmail);
+
+    _getDominios();
   }
 
   //Para que se actualice el campo de email
@@ -69,7 +73,7 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
 
     if (_formKey.currentState!.validate()) {
       final userAdd = User(
-        dominio: 0,
+        dominio: int.tryParse(_selectedDomain ?? '0') ?? 0,
         id: 0,
         login: _loginController.text.trim(),
         password: _passwordController.text.trim(),
@@ -130,6 +134,32 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
           btnOkOnPress: () {},
         ).show();
       }
+    }
+  }
+
+  void _getDominios() async {
+    try {
+      final resp = await getDominios(accessToken);
+
+      setState(() {
+        listDominios = resp;
+
+        _selectedDomain = listDominios
+            .firstWhere(
+              (dom) => dom['Domain'] == _dominioController.text,
+              orElse: () => null,
+            )
+            .toString();
+      });
+    } catch (e) {
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        title: 'Error',
+        desc: e.toString(),
+        btnOkOnPress: () {},
+        btnOkColor: Colors.red,
+      ).show();
     }
   }
 
@@ -206,6 +236,7 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
                       const SizedBox(height: 16),
 
                       PasswordField(
+                        label_text: loc.label_password,
                         controller: _passwordController,
                         edit: false,
                       ),
@@ -286,24 +317,23 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
                           filled: true,
                           fillColor: const Color.fromARGB(255, 255, 255, 255),
                         ),
-                        value: _dominioController.text.isNotEmpty
-                            ? _dominioController.text
-                            : null,
+                        value: '1',
                         //value: _dominioController.text,
-                        items: const [
-                          DropdownMenuItem(
-                            value: '@example.com',
-                            child: Text('example.com'),
-                          ),
-                          DropdownMenuItem(
-                            value: '@ejemplo.com',
-                            child: Text('ejemplo.com'),
-                          ),
-                        ],
+                        items: listDominios.map<DropdownMenuItem<String>>((
+                          dom,
+                        ) {
+                          return DropdownMenuItem<String>(
+                            value: dom['ID'].toString(),
+                            child: Text(dom['Domain']),
+                          );
+                        }).toList(),
                         onChanged: (value) {
                           setState(() {
-                            _dominioController.text =
-                                value ?? ''; // 🔹 Actualiza el controller
+                            _selectedDomain = value;
+                            final domSeleccionado = listDominios.firstWhere(
+                              (dom) => dom['ID'].toString() == value,
+                            );
+                            _dominioController.text = domSeleccionado['Domain'];
                           });
                         },
                         validator: (value) =>

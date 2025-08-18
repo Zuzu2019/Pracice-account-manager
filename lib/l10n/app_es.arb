@@ -59,5 +59,7 @@
   "deleted": "Eliminado",
   "email": "Correo electrónico",
   "invalid_email": "Correo inválido",
-  "sign_in": "Ingresar"
+  "sign_in": "Ingresar",
+  "old_password": "Contraseña anterior",
+  "new_password": "Contraseña nueva"
 }

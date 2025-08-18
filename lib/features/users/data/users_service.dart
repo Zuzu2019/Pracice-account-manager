@@ -22,7 +22,7 @@ Future<List<User>> getUsers(String? token) async {
 
 Future<http.Response> saveUser(User user, String? token) async {
   final response = await http.post(
-    Uri.parse('http://192.168.100.189:7000/user'),
+    Uri.parse('http://192.168.100.189:7000/register'),
     headers: {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
@@ -60,6 +60,27 @@ Future<http.Response> deleteUser(int id, String? token) async {
   return response;
 }
 
+// Future<http.Response> updateUserPassword(int id, String? token) async {
+//   final url = 'http://192.168.100.189:7000/user/pass/$id';
+
+//   final contras = {
+//     "password": "usuario1pass!",
+//     "newPassword": "string1pass!", // nueva contraseña
+//     "confirmPassword": "string1pass!", // confirmación
+//   };
+
+//   final response = await http.put(
+//     Uri.parse(url),
+//     headers: {
+//       'Authorization': 'Bearer $token',
+//       'Content-Type': 'application/json',
+//     },
+//     body: jsonEncode(contras), // <-- aquí ya no usamos .toJson()
+//   );
+
+//   return response;
+// }
+
 Future<List> getDominios(String? token) async {
   final response = await http.get(
     Uri.parse('http://192.168.100.189:7000/transports'),
@@ -73,6 +94,6 @@ Future<List> getDominios(String? token) async {
     final List<dynamic> jsonList = jsonDecode(response.body);
     return jsonList;
   } else {
-    throw Exception('Error al obtener alias');
+    throw Exception('Error al obtener los dominios');
   }
 }
