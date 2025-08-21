@@ -4,8 +4,14 @@ import 'package:practice_acount_manager/l10n/app_localizations.dart';
 class PasswordField extends StatefulWidget {
   final TextEditingController controller;
   final bool edit;
+  final String label_text;
 
-  const PasswordField({super.key, required this.controller, this.edit = false});
+  const PasswordField({
+    super.key,
+    required this.controller,
+    this.edit = false,
+    required this.label_text,
+  });
 
   @override
   State<PasswordField> createState() => _PasswordFieldState();
@@ -28,7 +34,7 @@ class _PasswordFieldState extends State<PasswordField> {
       controller: widget.controller,
       obscureText: _obscure,
       decoration: InputDecoration(
-        labelText: loc.label_password,
+        labelText: widget.label_text,
         labelStyle: const TextStyle(
           color: Color.fromARGB(255, 25, 0, 255),
           fontWeight: FontWeight.bold,

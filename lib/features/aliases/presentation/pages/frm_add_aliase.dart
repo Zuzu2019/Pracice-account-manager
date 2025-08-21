@@ -1,69 +1,131 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:practice_acount_manager/features/aliases/data/alias_service.dart';
 import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_aliase_navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_cancel.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
+import 'package:practice_acount_manager/features/widgets/generals/text_form_field.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
+import 'package:practice_acount_manager/riverpod/auth_provider.dart';
 
-class AddAliasForm extends StatefulWidget {
+class AddAliasForm extends ConsumerStatefulWidget {
   final Aliases alias;
   final bool isEditing;
 
   const AddAliasForm({super.key, required this.alias, this.isEditing = false});
   @override
-  State<AddAliasForm> createState() => _AddAliasFormState();
+  ConsumerState<AddAliasForm> createState() => _AddAliasFormState();
 }
 
-class _AddAliasFormState extends State<AddAliasForm> {
+class _AddAliasFormState extends ConsumerState<AddAliasForm> {
   final _formKey = GlobalKey<FormState>();
-  //final TextEditingController _localController = TextEditingController();
-  //final TextEditingController _remotoController = TextEditingController();
-
   late final TextEditingController _localController;
   late final TextEditingController _remotoController;
+  late final TextEditingController _idController;
+  late final accessToken = ref.read(authProvider).accessToken;
 
   void initState() {
     super.initState();
+    _idController = TextEditingController(text: widget.alias.id.toString());
     _localController = TextEditingController(text: widget.alias.local);
     _remotoController = TextEditingController(text: widget.alias.remoto);
   }
 
-  void _submitForm(BuildContext context) {
+  void _submitForm(BuildContext context) async {
     final loc = AppLocalizations.of(context)!;
+    final id = int.tryParse(_idController.text.trim()) ?? 0;
 
     if (_formKey.currentState!.validate()) {
       final updateAliases = Aliases(
+        id: int.tryParse(_idController.text.trim()) ?? 0,
         local: _localController.text.trim(),
         remoto: _remotoController.text.trim(),
       );
 
       if (widget.isEditing) {
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.info,
-          animType: AnimType.rightSlide,
-          title: loc.aliasUpdated,
-          desc: loc.aliasAddedSuccessfully,
-          btnOkOnPress: () {
-            Navigator.pop(context, updateAliases); // devolver alias editado
-          },
-          btnOkColor: Colors.blue,
-        ).show();
+        try {
+          // final resp = await updateAlias(id, updateAliases, accessToken);
+
+          // if (resp.statusCode == 200 || resp.statusCode == 201) {
+          //   await AwesomeDialog(
+          //     context: context,
+          //     dialogType: DialogType.success,
+          //     animType: AnimType.rightSlide,
+          //     title: loc.alias_updated,
+          //     desc: loc.alias_updated_successfully,
+          //     btnOkOnPress: () {
+          //       Navigator.pop(context, updateAliases);
+          //     },
+          //     btnOkColor: Colors.blue,
+          //   ).show();
+          // } else {
+          //   String errorMessage = resp.body.isNotEmpty
+          //       ? resp.body
+          //       : 'Error inesperado: Código ${resp.statusCode}';
+
+          //   await AwesomeDialog(
+          //     context: context,
+          //     dialogType: DialogType.error,
+          //     animType: AnimType.rightSlide,
+          //     title: loc.error_title,
+          //     desc: errorMessage,
+          //     btnOkOnPress: () {
+          //       Navigator.pop(context);
+          //     },
+          //     btnOkColor: Colors.red,
+          //   ).show();
+          // }
+        } catch (e) {
+          await AwesomeDialog(
+            context: context,
+            dialogType: DialogType.error,
+            animType: AnimType.rightSlide,
+            title: loc.error_title,
+            desc: 'Error al actualizar alias: $e',
+            btnOkOnPress: () {
+              Navigator.pop(context);
+            },
+            btnOkColor: Colors.red,
+          ).show();
+        }
       } else {
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.success,
-          animType: AnimType.rightSlide,
-          title: loc.successTitle,
-          desc: loc.aliasAddedSuccessfully,
-          btnOkOnPress: () {
-            _formKey.currentState!.reset();
-            _localController.clear();
-            _remotoController.clear();
-          },
-          btnOkColor: Colors.green,
-        ).show();
+        // final resp = await saveAlias(updateAliases, accessToken);
+
+        // if (resp.statusCode == 200) {
+        //   AwesomeDialog(
+        //     context: context,
+        //     dialogType: DialogType.success,
+        //     animType: AnimType.rightSlide,
+        //     title: loc.success_title,
+        //     desc: loc.alias_added_successfully,
+        //     btnOkOnPress: () {
+        //       _formKey.currentState!.reset();
+        //       _localController.clear();
+        //       _remotoController.clear();
+        //     },
+        //     btnOkColor: Colors.green,
+        //   ).show();
+        // } else {
+        //   String errorMessage = resp.body.isNotEmpty
+        //       ? resp.body
+        //       : 'Error inesperado: Código ${resp.statusCode}';
+
+        //   AwesomeDialog(
+        //     context: context,
+        //     dialogType: DialogType.error,
+        //     animType: AnimType.rightSlide,
+        //     title: loc.error_title,
+        //     desc: errorMessage,
+        //     btnOkOnPress: () {
+        //       // _formKey.currentState!.reset();
+        //       // _localController.clear();
+        //       // _remotoController.clear();
+        //     },
+        //     btnOkColor: Colors.red,
+        //   ).show();
+        // }
       }
     }
   }
@@ -78,7 +140,7 @@ class _AddAliasFormState extends State<AddAliasForm> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    final title = widget.isEditing ? loc.editAlias : loc.addAlias;
+    final title = widget.isEditing ? loc.edit_alias : loc.add_alias;
     final btnText = widget.isEditing ? loc.update_button : loc.button_add;
 
     return Scaffold(
@@ -125,111 +187,30 @@ class _AddAliasFormState extends State<AddAliasForm> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      TextFormField(
+                      CustomTextFormField(
                         controller: _localController,
-                        decoration: InputDecoration(
-                          labelText: loc.localLabel,
-                          labelStyle: const TextStyle(
-                            color: Color.fromARGB(255, 25, 0, 255),
-                            fontWeight: FontWeight.bold,
-                          ),
-                          hintText: loc.localAliasHint,
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          prefixIcon: const Icon(
-                            Icons.person,
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        ),
+                        label: loc.local_label,
+                        hint: loc.local_alias_hint,
+                        icon: Icons.person,
                         validator: (value) => value == null || value.isEmpty
                             ? loc.field_required
                             : null,
                       ),
 
                       const SizedBox(height: 16),
-                      TextFormField(
+
+                      CustomTextFormField(
                         controller: _remotoController,
-                        //minLines: 3,
-                        maxLines: null,
-                        keyboardType: TextInputType.multiline,
-                        decoration: InputDecoration(
-                          labelText: loc.remoteLabel,
-                          labelStyle: const TextStyle(
-                            color: Color.fromARGB(255, 25, 0, 255),
-                            fontWeight: FontWeight.bold,
-                          ),
-                          hintText: loc.remoteAliasHint,
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          prefixIcon: const Icon(
-                            Icons.cloud,
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        ),
+                        label: loc.remote_label,
+                        hint: loc.remote_alias_hint,
+                        icon: Icons.cloud,
                         validator: (value) => value == null || value.isEmpty
                             ? loc.field_required
                             : null,
                       ),
 
                       const SizedBox(height: 32),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

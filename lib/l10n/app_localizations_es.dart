@@ -75,7 +75,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get select_language => 'Seleccionar idioma';
 
   @override
-  String get user_management => 'User management';
+  String get user_management => 'Gestión de usuarios';
 
   @override
   String get menu => 'Menú';
@@ -90,7 +90,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get users => 'Usuarios';
 
   @override
-  String get logout => 'Cerrar Sesión';
+  String get logout => 'Cerrar sesión';
 
   @override
   String get logout_question => '¿Cerrar sesión?';
@@ -117,13 +117,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get update_button => 'Actualizar';
 
   @override
-  String get confirm_password_label => 'Confirmar contraseña';
-
-  @override
-  String get confirm_password_hint => 'Repite tu contraseña';
-
-  @override
-  String get delete_confirmation => 'se va a eliminar. ¿Está seguro de continuar?';
+  String get delete_confirmation => 'Se va a eliminar. ¿Está seguro de continuar?';
 
   @override
   String get edit => 'Editar';
@@ -132,59 +126,74 @@ class AppLocalizationsEs extends AppLocalizations {
   String get delete => 'Eliminar';
 
   @override
-  String get cancelConfirmation => '¿Estás seguro de que deseas cancelar?';
+  String get cancel_confirmation => '¿Estás seguro de que deseas cancelar?';
 
   @override
   String get list => 'Lista';
 
   @override
-  String get aliasManagement => 'Gestión de aliases';
+  String get alias_management => 'Gestión de aliases';
 
   @override
-  String get errorTitle => 'Error';
+  String get error_title => 'Error';
 
   @override
-  String get successTitle => 'Éxito';
+  String get success_title => 'Éxito';
 
   @override
-  String get userAddedSuccessfully => 'Usuario agregado correctamente';
+  String get user_added_successfully => 'Usuario agregado correctamente';
 
   @override
-  String get aliasUpdated => 'Alias actualizado';
+  String get alias_updated => 'Alias actualizado';
 
   @override
-  String get aliasUpdatedSuccessfully => 'Los datos del alias fueron modificados correctamente.';
+  String get user_updated => 'Usuario actualizado';
 
   @override
-  String get aliasAddedSuccessfully => 'Alias agregado correctamente.';
+  String get alias_updated_successfully => 'Los datos del alias fueron modificados correctamente.';
 
   @override
-  String get editAlias => 'Editar alias';
+  String get user_updated_successfully => 'Los datos del usuario fueron modificados correctamente.';
 
   @override
-  String get addAlias => 'Agregar alias';
+  String get alias_added_successfully => 'Alias agregado correctamente.';
 
   @override
-  String get localLabel => 'Local';
+  String get edit_alias => 'Editar alias';
 
   @override
-  String get localAliasHint => 'Ingresa tu alias local';
+  String get add_alias => 'Agregar alias';
 
   @override
-  String get remoteLabel => 'Remoto';
+  String get local_label => 'Local';
 
   @override
-  String get remoteAliasHint => 'Ingresa tu alias remoto';
+  String get local_alias_hint => 'Ingresa tu alias local';
 
   @override
-  String get deleted => 'eliminado';
+  String get remote_label => 'Remoto';
+
+  @override
+  String get remote_alias_hint => 'Ingresa tu alias remoto';
+
+  @override
+  String get deleted => 'Eliminado';
 
   @override
   String get email => 'Correo electrónico';
 
   @override
-  String get invalidEmail => 'Correo inválido';
+  String get invalid_email => 'Correo inválido';
 
   @override
-  String get signIn => 'Ingresar';
+  String get sign_in => 'Ingresar';
+
+  @override
+  String get old_password => 'Contraseña anterior';
+
+  @override
+  String get new_password => 'Contraseña nueva';
+
+  @override
+  String get password_updated => 'Contraseña actualizada';
 }

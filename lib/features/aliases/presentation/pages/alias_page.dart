@@ -15,7 +15,7 @@ class AliasPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          loc.aliasManagement,
+          loc.alias_management,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,

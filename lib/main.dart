@@ -1,30 +1,39 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_gcaptcha_v3/recaptca_config.dart';
+import 'package:flutter_gcaptcha_v3/web_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/auth/presentation/pages/login_page_local.dart';
-import 'package:practice_acount_manager/features/auth/presentation/service/auth_Service.dart';
+import 'package:practice_acount_manager/features/auth/presentation/service/auth_service.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
 import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
 import 'package:oidc_default_store/oidc_default_store.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
 import 'package:practice_acount_manager/riverpod/statenotifier.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 late final AuthService authService;
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  //WidgetsFlutterBinding.ensureInitialized();
+
   await dotenv.load(fileName: ".env");
   await OidcDefaultStore().init();
   authService = AuthService();
   await authService.initialize();
 
+  // RecaptchaHandler.instance.setupSiteKey(
+  //   dataSiteKey: dotenv.env['SITE_KEY_RECAPTCHA'] ?? '',
+  // );
+
   runApp(
-    const ProviderScope( // Necesario para Riverpod
+    const ProviderScope(
+      // Necesario para Riverpod
       child: MyApp(),
     ),
   );
