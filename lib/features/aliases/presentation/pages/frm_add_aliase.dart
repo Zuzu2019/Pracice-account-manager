@@ -46,37 +46,37 @@ class _AddAliasFormState extends ConsumerState<AddAliasForm> {
 
       if (widget.isEditing) {
         try {
-          final resp = await updateAlias(id, updateAliases, accessToken);
+          // final resp = await updateAlias(id, updateAliases, accessToken);
 
-          if (resp.statusCode == 200 || resp.statusCode == 201) {
-            await AwesomeDialog(
-              context: context,
-              dialogType: DialogType.success,
-              animType: AnimType.rightSlide,
-              title: loc.alias_updated,
-              desc: loc.alias_updated_successfully,
-              btnOkOnPress: () {
-                Navigator.pop(context, updateAliases);
-              },
-              btnOkColor: Colors.blue,
-            ).show();
-          } else {
-            String errorMessage = resp.body.isNotEmpty
-                ? resp.body
-                : 'Error inesperado: Código ${resp.statusCode}';
+          // if (resp.statusCode == 200 || resp.statusCode == 201) {
+          //   await AwesomeDialog(
+          //     context: context,
+          //     dialogType: DialogType.success,
+          //     animType: AnimType.rightSlide,
+          //     title: loc.alias_updated,
+          //     desc: loc.alias_updated_successfully,
+          //     btnOkOnPress: () {
+          //       Navigator.pop(context, updateAliases);
+          //     },
+          //     btnOkColor: Colors.blue,
+          //   ).show();
+          // } else {
+          //   String errorMessage = resp.body.isNotEmpty
+          //       ? resp.body
+          //       : 'Error inesperado: Código ${resp.statusCode}';
 
-            await AwesomeDialog(
-              context: context,
-              dialogType: DialogType.error,
-              animType: AnimType.rightSlide,
-              title: loc.error_title,
-              desc: errorMessage,
-              btnOkOnPress: () {
-                Navigator.pop(context);
-              },
-              btnOkColor: Colors.red,
-            ).show();
-          }
+          //   await AwesomeDialog(
+          //     context: context,
+          //     dialogType: DialogType.error,
+          //     animType: AnimType.rightSlide,
+          //     title: loc.error_title,
+          //     desc: errorMessage,
+          //     btnOkOnPress: () {
+          //       Navigator.pop(context);
+          //     },
+          //     btnOkColor: Colors.red,
+          //   ).show();
+          // }
         } catch (e) {
           await AwesomeDialog(
             context: context,
@@ -91,41 +91,41 @@ class _AddAliasFormState extends ConsumerState<AddAliasForm> {
           ).show();
         }
       } else {
-        final resp = await saveAlias(updateAliases, accessToken);
+        // final resp = await saveAlias(updateAliases, accessToken);
 
-        if (resp.statusCode == 200) {
-          AwesomeDialog(
-            context: context,
-            dialogType: DialogType.success,
-            animType: AnimType.rightSlide,
-            title: loc.success_title,
-            desc: loc.alias_added_successfully,
-            btnOkOnPress: () {
-              _formKey.currentState!.reset();
-              _localController.clear();
-              _remotoController.clear();
-            },
-            btnOkColor: Colors.green,
-          ).show();
-        } else {
-          String errorMessage = resp.body.isNotEmpty
-              ? resp.body
-              : 'Error inesperado: Código ${resp.statusCode}';
+        // if (resp.statusCode == 200) {
+        //   AwesomeDialog(
+        //     context: context,
+        //     dialogType: DialogType.success,
+        //     animType: AnimType.rightSlide,
+        //     title: loc.success_title,
+        //     desc: loc.alias_added_successfully,
+        //     btnOkOnPress: () {
+        //       _formKey.currentState!.reset();
+        //       _localController.clear();
+        //       _remotoController.clear();
+        //     },
+        //     btnOkColor: Colors.green,
+        //   ).show();
+        // } else {
+        //   String errorMessage = resp.body.isNotEmpty
+        //       ? resp.body
+        //       : 'Error inesperado: Código ${resp.statusCode}';
 
-          AwesomeDialog(
-            context: context,
-            dialogType: DialogType.error,
-            animType: AnimType.rightSlide,
-            title: loc.error_title,
-            desc: errorMessage,
-            btnOkOnPress: () {
-              // _formKey.currentState!.reset();
-              // _localController.clear();
-              // _remotoController.clear();
-            },
-            btnOkColor: Colors.red,
-          ).show();
-        }
+        //   AwesomeDialog(
+        //     context: context,
+        //     dialogType: DialogType.error,
+        //     animType: AnimType.rightSlide,
+        //     title: loc.error_title,
+        //     desc: errorMessage,
+        //     btnOkOnPress: () {
+        //       // _formKey.currentState!.reset();
+        //       // _localController.clear();
+        //       // _remotoController.clear();
+        //     },
+        //     btnOkColor: Colors.red,
+        //   ).show();
+        // }
       }
     }
   }

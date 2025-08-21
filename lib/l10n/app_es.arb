@@ -61,5 +61,6 @@
   "invalid_email": "Correo inválido",
   "sign_in": "Ingresar",
   "old_password": "Contraseña anterior",
-  "new_password": "Contraseña nueva"
+  "new_password": "Contraseña nueva",
+  "password_updated": "Contraseña actualizada"
 }

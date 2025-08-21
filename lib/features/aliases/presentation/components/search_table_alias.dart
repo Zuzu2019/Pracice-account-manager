@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:practice_acount_manager/features/aliases/data/alias_service.dart';
 import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/frm_add_aliase.dart';
+import 'package:practice_acount_manager/features/aliases/providers/alias_provider.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
 import 'package:practice_acount_manager/riverpod/auth_provider.dart';
@@ -16,50 +17,41 @@ class SearchTableAliases extends ConsumerStatefulWidget {
 }
 
 class _SearchTableAliasesState extends ConsumerState<SearchTableAliases> {
-  AliasesDataSource? _dataSource;
-  bool _initialized = false;
-  List<Aliases> _aliases = [];
-
   final TextEditingController _searchCtrl = TextEditingController();
   late final accessToken = ref.read(authProvider).accessToken;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    if (!_initialized) {
-      _initialized = true;
-      _loadAndInit();
-    }
   }
 
-  Future<void> _loadAndInit() async {
-    final resp = await getAlias(accessToken); // Trae la lista desde backend
-    final loc = AppLocalizations.of(context)!;
+  // Future<void> _loadAndInit() async {
+  //   final resp = await getAlias(accessToken); // Trae la lista desde backend
+  //   final loc = AppLocalizations.of(context)!;
 
-    setState(() {
-      _aliases = resp;
-      _dataSource = AliasesDataSource(
-        alias: _aliases,
-        onEdit: _onEdit,
-        onDelete: (alias) => _onDelete(alias, context),
-        loc: loc,
-      );
-    });
-  }
+  //   setState(() {
+  //     _aliases = resp;
+  //     _dataSource = AliasesDataSource(
+  //       alias: _aliases,
+  //       onEdit: _onEdit,
+  //       onDelete: (alias) => _onDelete(alias, context),
+  //       loc: loc,
+  //     );
+  //   });
+  // }
 
-  Future<void> _onEdit(Aliases u) async {
-    final edited = await Navigator.push<Aliases>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddAliasForm(alias: u, isEditing: true),
-      ),
-    );
+  // Future<void> _onEdit(Aliases u) async {
+  //   final edited = await Navigator.push<Aliases>(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => AddAliasForm(alias: u, isEditing: true),
+  //     ),
+  //   );
 
-    if (edited != null) {
-      _loadAndInit();
-    }
-  }
+  //   if (edited != null) {
+  //     _loadAndInit();
+  //   }
+  // }
 
   void _onDelete(Aliases alias, BuildContext context) {
     final loc = AppLocalizations.of(context)!;
@@ -74,29 +66,29 @@ class _SearchTableAliasesState extends ConsumerState<SearchTableAliases> {
       btnCancelOnPress: () {},
       btnOkText: loc.confirm,
       btnOkOnPress: () async {
-        final resp = await deleteAlias(alias.id, accessToken);
+        //final resp = await deleteAlias(alias.id, accessToken);
 
-        if (resp.statusCode == 200) {
-          _loadAndInit();
+        // if (resp.statusCode == 200) {
+        //   //_loadAndInit();
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('"${alias.local}" ${loc.deleted}'),
-              duration: Duration(seconds: 3),
-              backgroundColor: Colors.green,
-              elevation: 5,
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error al eliminar"${resp.body}"'),
-              duration: Duration(seconds: 3),
-              backgroundColor: Colors.red,
-              elevation: 5,
-            ),
-          );
-        }
+        //   ScaffoldMessenger.of(context).showSnackBar(
+        //     SnackBar(
+        //       content: Text('"${alias.local}" ${loc.deleted}'),
+        //       duration: Duration(seconds: 3),
+        //       backgroundColor: Colors.green,
+        //       elevation: 5,
+        //     ),
+        //   );
+        // } else {
+        //   ScaffoldMessenger.of(context).showSnackBar(
+        //     SnackBar(
+        //       content: Text('Error al eliminar"${resp.body}"'),
+        //       duration: Duration(seconds: 3),
+        //       backgroundColor: Colors.red,
+        //       elevation: 5,
+        //     ),
+        //   );
+        // }
       },
     ).show();
   }
@@ -110,194 +102,92 @@ class _SearchTableAliasesState extends ConsumerState<SearchTableAliases> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    final aliasAsync = ref.watch(aliasProvider); //Consumimos aliasProvider
 
-    if (_dataSource == null) {
-      return Center(child: CircularProgressIndicator());
-    }
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(15),
-      child: Column(
-        children: [
-          SearchBarExample(
-            onQueryChanged: (query) {
-              _dataSource?.filter(query);
-              setState(() {});
-            },
-          ),
-          const SizedBox(height: 16),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: _dataSource?.visibleCount,
-            itemBuilder: (context, index) {
-              final alias = _dataSource?.getVisibleAt(index);
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 1),
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ListTile(
-                  leading: const Icon(Icons.person, color: Colors.blue),
-                  title: Text(
-                    '${loc.local_label}: ${alias?.local}',
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                  subtitle: Text(
-                    '${loc.remote_label}: ${alias?.remoto}',
-                    style: TextStyle(fontSize: 13),
-                  ),
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        _onEdit(alias!);
-                      } else if (value == 'delete') {
-                        _onDelete(alias!, context);
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, color: Colors.blue),
-                            SizedBox(width: 8),
-                            Text(loc.edit),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text(loc.delete),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class AliasesDataSource extends DataTableSource {
-  final void Function(Aliases) onEdit;
-  final void Function(Aliases) onDelete;
-  final AppLocalizations loc;
-  final List<Aliases> _all;
-  List<Aliases> _visible;
-
-  int get visibleCount => _visible.length;
-  Aliases getVisibleAt(int index) => _visible[index];
-
-  AliasesDataSource({
-    required List<Aliases> alias,
-    required this.onEdit,
-    required this.onDelete,
-    required this.loc,
-  }) : _all = List<Aliases>.from(alias),
-       _visible = List<Aliases>.from(alias);
-
-  void filter(String query) {
-    final q = query.toLowerCase().trim();
-    if (q.isEmpty) {
-      _visible = List<Aliases>.from(_all);
-    } else {
-      _visible = _all.where((u) {
-        return u.remoto.toLowerCase().contains(q) ||
-            u.remoto.toLowerCase().contains(q);
-      }).toList();
-    }
-    notifyListeners();
-  }
-
-  void delete(Aliases u) {
-    _all.removeWhere((x) => x.local == u.local);
-    _visible.removeWhere((x) => x.local == u.local);
-    notifyListeners();
-  }
-
-  @override
-  DataRow? getRow(int index) {
-    if (index >= _visible.length) return null;
-    final u = _visible[index];
-
-    final rowColor = index % 2 == 0
-        ? const Color(0xFFE3F2FD)
-        : const Color(0xFFBBDEFB);
-
-    return DataRow.byIndex(
-      index: index,
-      color: WidgetStateProperty.all(rowColor),
-      cells: [
-        DataCell(Text(u.local)),
-        DataCell(Text(u.remoto)),
-        DataCell(
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'edit') {
-                onEdit(u);
-              } else if (value == 'delete') {
-                onDelete(u);
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(Icons.edit, color: Color.fromARGB(255, 72, 115, 242)),
-                    SizedBox(width: 8),
-                    Text(
-                      loc.edit,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 72, 115, 242),
-                      ),
-                    ),
-                  ],
-                ),
+    return aliasAsync.when(
+      data: (aliases) {
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(15),
+          child: Column(
+            children: [
+              SearchBarExample(
+                onQueryChanged: (query) {
+                  ref.read(aliasProvider.notifier).setSearchQuery(query);
+                },
               ),
-              PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text(
-                      loc.delete,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
+              const SizedBox(height: 16),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: aliases.length,
+                itemBuilder: (context, index) {
+                  final alias = aliases[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 1,
+                    ),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      leading: const Icon(Icons.person, color: Colors.blue),
+                      title: Text(
+                        '${loc.local_label}: ${alias?.local}',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      subtitle: Text(
+                        '${loc.remote_label}: ${alias?.remoto}',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      trailing: PopupMenuButton<String>(
+                        onSelected: (value) async {
+                          if (value == 'edit') {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    AddAliasForm(alias: alias),
+                              ),
+                            );
+                          } else if (value == 'delete') {
+                            _onDelete(alias!, context);
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit, color: Colors.blue),
+                                SizedBox(width: 8),
+                                Text(loc.edit),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, color: Colors.red),
+                                SizedBox(width: 8),
+                                Text(loc.delete),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ],
-            icon: const Icon(Icons.more_vert),
           ),
-        ),
-      ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(child: Text('Error: $error')),
     );
   }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => _visible.length;
-
-  @override
-  int get selectedRowCount => 0;
 }

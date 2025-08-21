@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:practice_acount_manager/features/dominios/provider/dominio_service.dart';
 import 'package:practice_acount_manager/features/users/data/users_service.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_confirm_user.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
+import 'package:practice_acount_manager/features/users/provider/user_provider.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_cancel.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_user_navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
@@ -34,7 +36,6 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
 
   late final TextEditingController _emailController;
 
-  String? dominio;
   List listDominios = [];
   String? _selectedDomain;
 
@@ -52,8 +53,6 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
 
     _loginController.addListener(_updateEmail);
     _dominioController.addListener(_updateEmail);
-
-    _getDominios();
   }
 
   //Para que se actualice el campo de email
@@ -61,11 +60,13 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
     final login = _loginController.text.trim();
     final dominio = _dominioController.text.trim();
 
-    if (login.isNotEmpty && dominio.isNotEmpty) {
-      _emailController.text = '$login$dominio';
-    } else {
-      _emailController.clear();
-    }
+    setState(() {
+      if (login.isNotEmpty && dominio.isNotEmpty) {
+        _emailController.text = '$login$dominio';
+      } else {
+        _emailController.clear();
+      }
+    });
   }
 
   void _submitForm(BuildContext context) async {
@@ -96,35 +97,25 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
       }
 
       try {
-        final resp = await saveUser(userAdd, accessToken);
+        await ref.read(userProvider.notifier).addUsers(userAdd);
 
-        if (resp.statusCode == 200) {
-          AwesomeDialog(
-            context: context,
-            dialogType: DialogType.success,
-            title: loc.success_title,
-            desc: loc.user_added_successfully,
-            btnOkOnPress: () {
-              _formKey.currentState!.reset();
-              _loginController.clear();
-              _passwordController.clear();
-              _confirmPasswordController.clear();
-              _identificacionController.clear();
-              _groupController.clear();
-              _quotaController.clear();
-            },
-            btnOkColor: Colors.green,
-          ).show();
-        } else {
-          AwesomeDialog(
-            context: context,
-            dialogType: DialogType.error,
-            title: loc.error_title,
-            desc: resp.body,
-            btnOkOnPress: () {},
-            btnOkColor: Colors.red,
-          ).show();
-        }
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.success,
+          title: loc.success_title,
+          desc: loc.user_added_successfully,
+          btnOkOnPress: () {
+            _formKey.currentState!.reset();
+            _loginController.clear();
+            _passwordController.clear();
+            _confirmPasswordController.clear();
+            _identificacionController.clear();
+            _groupController.clear();
+            _quotaController.clear();
+            Navigator.pop(context);
+          },
+          btnOkColor: Colors.green,
+        ).show();
       } catch (e) {
         AwesomeDialog(
           context: context,
@@ -134,32 +125,6 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
           btnOkOnPress: () {},
         ).show();
       }
-    }
-  }
-
-  void _getDominios() async {
-    try {
-      final resp = await getDominios(accessToken);
-
-      setState(() {
-        listDominios = resp;
-
-        _selectedDomain = listDominios
-            .firstWhere(
-              (dom) => dom['Domain'] == _dominioController.text,
-              orElse: () => null,
-            )
-            .toString();
-      });
-    } catch (e) {
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.error,
-        title: 'Error',
-        desc: e.toString(),
-        btnOkOnPress: () {},
-        btnOkColor: Colors.red,
-      ).show();
     }
   }
 
@@ -178,6 +143,8 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    final dominiosAsync = ref.watch(dominiosProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -199,209 +166,213 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            ButtonOptions(),
-            const SizedBox(height: 30),
-            const SizedBox(height: 16),
+      body: dominiosAsync.when(
+        data: (dominios) => SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ButtonOptions(),
+              const SizedBox(height: 30),
+              const SizedBox(height: 16),
 
-            Card(
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-                side: BorderSide(
-                  color: Color.fromARGB(255, 61, 130, 240),
-                  width: 2,
+              Card(
+                elevation: 5,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  side: BorderSide(
+                    color: Color.fromARGB(255, 61, 130, 240),
+                    width: 2,
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      CustomTextFormField(
-                        controller: _loginController,
-                        label: loc.label_login,
-                        hint: loc.hint_login,
-                        icon: Icons.person,
-                        validator: (value) => value == null || value.isEmpty
-                            ? loc.field_required
-                            : null,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      PasswordField(
-                        label_text: loc.label_password,
-                        controller: _passwordController,
-                        edit: false,
-                      ),
-                      const SizedBox(height: 16),
-                      ConfirmPasswordField(
-                        controller: _confirmPasswordController,
-                        originalPasswordController: _passwordController,
-                        edit: false,
-                      ),
-                      const SizedBox(height: 16),
-
-                      CustomTextFormField(
-                        controller: _identificacionController,
-                        label: loc.label_id,
-                        hint: loc.hint_id,
-                        icon: Icons.verified_user,
-                        validator: (value) => value == null || value.isEmpty
-                            ? loc.field_required
-                            : null,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      CustomTextFormField(
-                        controller: _groupController,
-                        label: loc.label_group,
-                        hint: loc.hint_group,
-                        icon: Icons.group,
-                        validator: (value) => value == null || value.isEmpty
-                            ? loc.field_required
-                            : null,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          labelText: loc.label_domain, //'Dominio',
-                          labelStyle: const TextStyle(
-                            color: Color.fromARGB(255, 25, 0, 255),
-                            fontWeight: FontWeight.bold,
-                          ),
-                          hintText:
-                              loc.domain_required, //'Selecciona un dominio',
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          prefixIcon: const Icon(
-                            Icons.domain,
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 61, 130, 240),
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        CustomTextFormField(
+                          controller: _loginController,
+                          label: loc.label_login,
+                          hint: loc.hint_login,
+                          icon: Icons.person,
+                          validator: (value) => value == null || value.isEmpty
+                              ? loc.field_required
+                              : null,
                         ),
-                        value: '1',
-                        //value: _dominioController.text,
-                        items: listDominios.map<DropdownMenuItem<String>>((
-                          dom,
-                        ) {
-                          return DropdownMenuItem<String>(
-                            value: dom['ID'].toString(),
-                            child: Text(dom['Domain']),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedDomain = value;
-                            final domSeleccionado = listDominios.firstWhere(
-                              (dom) => dom['ID'].toString() == value,
-                            );
-                            _dominioController.text = domSeleccionado['Domain'];
-                          });
-                        },
-                        validator: (value) =>
-                            value == null ? loc.hint_domain : null,
-                      ),
 
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
-                      CustomTextFormField(
-                        controller: _quotaController,
-                        label: loc.label_quota,
-                        hint: loc.hint_quota,
-                        icon: Icons.storage,
-                        keyboardType: TextInputType.number,
-                        validator: (value) => value == null || value.isEmpty
-                            ? loc.field_required
-                            : null,
-                      ),
+                        PasswordField(
+                          label_text: loc.label_password,
+                          controller: _passwordController,
+                          edit: false,
+                        ),
+                        const SizedBox(height: 16),
+                        ConfirmPasswordField(
+                          controller: _confirmPasswordController,
+                          originalPasswordController: _passwordController,
+                          edit: false,
+                        ),
+                        const SizedBox(height: 16),
 
-                      const SizedBox(height: 16),
+                        CustomTextFormField(
+                          controller: _identificacionController,
+                          label: loc.label_id,
+                          hint: loc.hint_id,
+                          icon: Icons.verified_user,
+                          validator: (value) => value == null || value.isEmpty
+                              ? loc.field_required
+                              : null,
+                        ),
 
-                      CustomTextFormField(
-                        controller: _emailController,
-                        label: loc.email,
-                        hint: '',
-                        icon: Icons.email,
-                        readOnly: true,
-                        validator: (value) => value == null || value.isEmpty
-                            ? loc.field_required
-                            : null,
-                      ),
+                        const SizedBox(height: 16),
 
-                      const SizedBox(height: 30),
+                        CustomTextFormField(
+                          controller: _groupController,
+                          label: loc.label_group,
+                          hint: loc.hint_group,
+                          icon: Icons.group,
+                          validator: (value) => value == null || value.isEmpty
+                              ? loc.field_required
+                              : null,
+                        ),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () => _submitForm(context),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromARGB(
-                                255,
-                                39,
-                                122,
-                                47,
-                              ),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                        const SizedBox(height: 16),
+
+                        DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: loc.label_domain, //'Dominio',
+                            labelStyle: const TextStyle(
+                              color: Color.fromARGB(255, 25, 0, 255),
+                              fontWeight: FontWeight.bold,
+                            ),
+                            hintText:
+                                loc.domain_required, //'Selecciona un dominio',
+                            hintStyle: const TextStyle(color: Colors.grey),
+                            prefixIcon: const Icon(
+                              Icons.domain,
+                              color: Color.fromARGB(255, 0, 0, 0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color.fromARGB(255, 61, 130, 240),
+                                width: 1.5,
                               ),
                             ),
-                            child: Text(loc.button_add),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color.fromARGB(255, 61, 130, 240),
+                                width: 2,
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Colors.red,
+                                width: 1.5,
+                              ),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Colors.red,
+                                width: 2,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: const Color.fromARGB(255, 255, 255, 255),
                           ),
-                          const SizedBox(width: 16),
-                          const ButtonCancel(),
-                        ],
-                      ),
-                    ],
+                          value: '1',
+                          //value: _dominioController.text,
+                          items: dominios.map<DropdownMenuItem<String>>((dom) {
+                            return DropdownMenuItem<String>(
+                              value: dom['ID'].toString(),
+                              child: Text(dom['Domain']),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedDomain = value;
+                              final domSeleccionado = dominios.firstWhere(
+                                (dom) => dom['ID'].toString() == value,
+                              );
+                              _dominioController.text =
+                                  domSeleccionado['Domain'];
+                            });
+                          },
+                          validator: (value) =>
+                              value == null ? loc.hint_domain : null,
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        CustomTextFormField(
+                          controller: _quotaController,
+                          label: loc.label_quota,
+                          hint: loc.hint_quota,
+                          icon: Icons.storage,
+                          keyboardType: TextInputType.number,
+                          validator: (value) => value == null || value.isEmpty
+                              ? loc.field_required
+                              : null,
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        CustomTextFormField(
+                          controller: _emailController,
+                          label: loc.email,
+                          hint: '',
+                          icon: Icons.email,
+                          readOnly: true,
+                          validator: (value) => value == null || value.isEmpty
+                              ? loc.field_required
+                              : null,
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () => _submitForm(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  39,
+                                  122,
+                                  47,
+                                ),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              child: Text(loc.button_add),
+                            ),
+                            const SizedBox(width: 16),
+                            const ButtonCancel(),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+        loading: () => Center(child: CircularProgressIndicator()),
+        error: (err, _) =>
+            Center(child: Text('Error al cargar dominios: $err')),
       ),
       bottomNavigationBar: const Footer(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

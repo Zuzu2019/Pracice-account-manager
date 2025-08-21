@@ -193,4 +193,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get new_password => 'Contraseña nueva';
+
+  @override
+  String get password_updated => 'Contraseña actualizada';
 }

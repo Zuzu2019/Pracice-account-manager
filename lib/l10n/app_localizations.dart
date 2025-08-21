@@ -466,6 +466,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New password'**
   String get new_password;
+
+  /// No description provided for @password_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated'**
+  String get password_updated;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

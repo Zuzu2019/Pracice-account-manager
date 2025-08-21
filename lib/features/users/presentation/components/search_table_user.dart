@@ -3,13 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:practice_acount_manager/features/users/provider/user_provider.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
-
-import 'package:practice_acount_manager/features/users/data/users_service.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/frm_update_user.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
-
-import '../../../../riverpod/auth_provider.dart';
 
 class SearchTableUser extends ConsumerStatefulWidget {
   const SearchTableUser({super.key});
@@ -19,75 +15,7 @@ class SearchTableUser extends ConsumerStatefulWidget {
 }
 
 class _SearchTableUserState extends ConsumerState<SearchTableUser> {
-  late final accessToken = ref.read(authProvider).accessToken;
   final TextEditingController _searchCtrl = TextEditingController();
-
-  UserDataSource? _dataSource;
-  bool _initialized = false;
-  List<User> _users = [];
-
-  // Se ejecuta después de initState y cuando el contexto cambia
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  void _onEdit(User u) async {
-    //updateUserPassword(2, accessToken);
-    final edited = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => UpdateUserForm(user: u)),
-    );
-
-    if (edited != null) {
-      //_loadAndInit();
-    }
-  }
-
-  void _onDelete(User user, BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.question,
-      animType: AnimType.bottomSlide,
-      title: loc.delete,
-      desc: '${user.login} ${loc.delete_confirmation}',
-      btnCancelText: loc.cancel,
-      btnCancelOnPress: () {},
-      btnOkText: loc.confirm,
-      btnOkOnPress: () async {
-        //final resp = await deleteUser(user.id, accessToken);
-        final result = ref.watch(deleteUserProvider(user.id));
-
-        result.when(
-          data: (resp) {
-            if (resp.statusCode == 200) {
-              ref.refresh(usersProvider);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('"${user.login}" ${loc.deleted}'),
-                  duration: const Duration(seconds: 3),
-                  backgroundColor: Colors.green,
-                  elevation: 5,
-                ),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Error al eliminar ${resp.body}'),
-                  duration: Duration(seconds: 3),
-                  backgroundColor: Colors.red,
-                  elevation: 5,
-                ),
-              );
-            }
-          },
-          loading: () => CircularProgressIndicator(),
-          error: (error, _) => Text('Error: $error'),
-        );
-      },
-    ).show();
-  }
 
   @override
   void dispose() {
@@ -95,40 +23,57 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
     super.dispose();
   }
 
+  void _onDelete(User user, BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.question,
+      animType: AnimType.bottomSlide,
+      title: loc.delete,
+      desc:
+          '${user.login} '
+          ' ${loc.delete_confirmation}',
+      btnCancelText: loc.cancel,
+      btnCancelOnPress: () {},
+      btnOkText: loc.confirm,
+      btnOkOnPress: () async {
+        final success = await ref
+            .read(userProvider.notifier)
+            .deleteUser(user.id);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(success ? '"${user.login}${loc.deleted}"' : 'Error'),
+            backgroundColor: success ? Colors.green : Colors.red,
+          ),
+        );
+      },
+    ).show();
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    final userAsync = ref.watch(usersProvider);
-    //final users = ref.watch(usersProvider);
+    final usersAsync = ref.watch(userProvider); // Consumimos userProvider
 
-    return userAsync.when(
+    return usersAsync.when(
       data: (users) {
-        final query = ref.watch(searchQueryProvider);
-        final filteredUsers = query.isEmpty
-            ? users
-            : users
-                  .where(
-                    (u) =>
-                        u.login.toLowerCase().contains(query.toLowerCase()) ||
-                        u.email.toLowerCase().contains(query.toLowerCase()),
-                  )
-                  .toList();
-
         return SingleChildScrollView(
           padding: const EdgeInsets.all(10),
           child: Column(
             children: [
               SearchBarExample(
                 onQueryChanged: (query) =>
-                    ref.read(searchQueryProvider.notifier).state = query,
+                    ref.read(userProvider.notifier).setSearchQuery(query),
               ),
               const SizedBox(height: 16),
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: filteredUsers.length,
+                itemCount: users.length,
                 itemBuilder: (context, index) {
-                  final user = filteredUsers[index];
+                  final user = users[index];
                   return Card(
                     margin: const EdgeInsets.symmetric(
                       vertical: 8,
@@ -169,7 +114,7 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
                                         ),
                                       ),
                                       Text(
-                                        '${user?.login}',
+                                        user.login,
                                         style: const TextStyle(fontSize: 13),
                                       ),
                                       const SizedBox(height: 12),
@@ -182,7 +127,7 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
                                         ),
                                       ),
                                       Text(
-                                        '${user?.email}',
+                                        user.email,
                                         style: const TextStyle(fontSize: 13),
                                       ),
                                       const SizedBox(height: 12),
@@ -204,7 +149,7 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
                                         ),
                                       ),
                                       Text(
-                                        '${user?.maildir}',
+                                        user.maildir,
                                         style: const TextStyle(fontSize: 13),
                                       ),
                                       Text(
@@ -216,7 +161,7 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
                                         ),
                                       ),
                                       Text(
-                                        '${user?.identificacion}',
+                                        user.identificacion,
                                         style: const TextStyle(fontSize: 13),
                                       ),
                                       const SizedBox(height: 12),
@@ -229,7 +174,7 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
                                         ),
                                       ),
                                       Text(
-                                        '${user?.grupo}',
+                                        user.grupo,
                                         style: const TextStyle(fontSize: 13),
                                       ),
                                       const SizedBox(height: 12),
@@ -242,7 +187,7 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
                                         ),
                                       ),
                                       Text(
-                                        '${user?.quota}',
+                                        (user.quota).toString(),
                                         style: const TextStyle(fontSize: 13),
                                       ),
                                     ],
@@ -252,11 +197,17 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
                             ),
                           ),
                           PopupMenuButton<String>(
-                            onSelected: (value) {
+                            onSelected: (value) async {
                               if (value == 'edit') {
-                                _onEdit(user!);
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        UpdateUserForm(user: user),
+                                  ),
+                                );
                               } else if (value == 'delete') {
-                                _onDelete(user!, context);
+                                _onDelete(user, context);
                               }
                             },
                             itemBuilder: (context) => [
@@ -293,135 +244,8 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
           ),
         );
       },
-      loading: () => Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(child: Text('Error: $error')),
     );
   }
-}
-
-class UserDataSource extends DataTableSource {
-  final void Function(User) onEdit;
-  final void Function(User) onDelete;
-  final AppLocalizations loc;
-
-  final List<User> _all;
-  List<User> _visible;
-
-  int get visibleCount => _visible.length;
-  User getVisibleAt(int index) => _visible[index];
-
-  UserDataSource({
-    required List<User> users,
-    required this.onEdit,
-    required this.onDelete,
-    required this.loc,
-  }) : _all = List<User>.from(users),
-       _visible = List<User>.from(users);
-
-  void filter(String query) {
-    final q = query.toLowerCase().trim();
-
-    if (q.isEmpty) {
-      _visible = List<User>.from(_all);
-    } else {
-      _visible = _all.where((u) {
-        final quotaStr = u.quota.toString();
-        return u.email.toLowerCase().contains(q) ||
-            u.maildir.toLowerCase().contains(q) ||
-            u.identificacion.toLowerCase().contains(q) ||
-            u.grupo.toLowerCase().contains(q) ||
-            quotaStr.contains(q);
-      }).toList();
-    }
-    notifyListeners();
-  }
-
-  void delete(User u) {
-    _all.removeWhere((x) => x.login == u.login);
-    _visible.removeWhere((x) => x.login == u.login);
-    notifyListeners();
-  }
-
-  @override
-  DataRow? getRow(int index) {
-    if (index >= _visible.length) return null;
-    final u = _visible[index];
-
-    final rowColor = index % 2 == 0
-        ? const Color(0xFFE3F2FD)
-        : const Color(0xFFBBDEFB);
-
-    return DataRow.byIndex(
-      index: index,
-      color: WidgetStateProperty.all(rowColor),
-      cells: [
-        DataCell(Text(u.login)),
-        DataCell(Text(u.email)),
-        DataCell(Text(u.maildir)),
-        DataCell(Text(u.identificacion)),
-        DataCell(Text(u.grupo)),
-        DataCell(Text(u.quota.toString())),
-        DataCell(
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'edit') {
-                onEdit(u);
-              } else if (value == 'delete') {
-                onDelete(u);
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.edit,
-                      color: const Color.fromARGB(255, 72, 115, 242),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      loc.edit,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 72, 115, 242),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    const Icon(Icons.delete, color: Colors.red),
-                    const SizedBox(width: 8),
-                    Text(
-                      loc.delete,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            icon: const Icon(Icons.more_vert),
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => _visible.length;
-
-  @override
-  int get selectedRowCount => 0;
 }

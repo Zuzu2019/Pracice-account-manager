@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:practice_acount_manager/features/dominios/provider/dominio_service.dart';
 import 'package:practice_acount_manager/features/users/data/users_service.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_confirm_user.dart';
+import 'package:practice_acount_manager/features/users/presentation/models/password.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
+import 'package:practice_acount_manager/features/users/provider/user_provider.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_cancel.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_user_navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
@@ -22,8 +25,10 @@ class UpdateUserForm extends ConsumerStatefulWidget {
 }
 
 class _AddUserFormState extends ConsumerState<UpdateUserForm> {
-  final _formKey = GlobalKey<FormState>();
+  final _generalFormKey = GlobalKey<FormState>();
+  final _passwordFormKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
+  final _passwordNewController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   late final accessToken = ref.read(authProvider).accessToken;
 
@@ -60,8 +65,6 @@ class _AddUserFormState extends ConsumerState<UpdateUserForm> {
 
     _loginController.addListener(_updateEmail);
     _dominioController.addListener(_updateEmail);
-
-    _getDominios();
   }
 
   void _updateEmail() {
@@ -77,10 +80,12 @@ class _AddUserFormState extends ConsumerState<UpdateUserForm> {
     });
   }
 
-  void _submitForm() async {
+  void _submitForm(WidgetRef ref) async {
     final loc = AppLocalizations.of(context)!;
 
-    if (_formKey.currentState!.validate()) {
+    // --- Actualización de datos generales ---
+    final isGeneralValid = _generalFormKey.currentState?.validate() ?? false;
+    if (isGeneralValid) {
       final user = User(
         dominio: int.tryParse(_selectedDomain ?? '0') ?? 0,
         id: widget.user.id,
@@ -93,85 +98,102 @@ class _AddUserFormState extends ConsumerState<UpdateUserForm> {
         quota: int.tryParse(_quotaController.text.trim()) ?? 0,
       );
 
-      if (_passwordController.text != _confirmPasswordController.text) {
-        AwesomeDialog(
+      try {
+        await ref.read(userProvider.notifier).updateUsers(user, user.id);
+        _showDialog(
           context: context,
-          dialogType: DialogType.error,
+          title: loc.user_updated,
+          description: loc.user_updated_successfully,
+          type: DialogType.success,
+          btnColor: Colors.green,
+          onOk: () => Navigator.pop(context),
+        );
+      } catch (e) {
+        _showDialog(
+          context: context,
           title: loc.error_title,
-          desc: loc.password_mismatch,
-          btnOkOnPress: () {},
-        ).show();
+          description: e.toString(),
+          type: DialogType.error,
+          btnColor: Colors.red,
+          onOk: () => Navigator.pop(context),
+        );
+      }
+    }
+
+    // --- Actualización de contraseña ---
+    final hasPasswordInput =
+        _passwordController.text.isNotEmpty ||
+        _passwordNewController.text.isNotEmpty ||
+        _confirmPasswordController.text.isNotEmpty;
+
+    if (hasPasswordInput) {
+      final isPasswordValid = _passwordFormKey.currentState?.validate() ?? true;
+      if (!isPasswordValid) return;
+
+      if (_passwordNewController.text.trim() !=
+          _confirmPasswordController.text.trim()) {
+        _showDialog(
+          context: context,
+          title: loc.error_title,
+          description: loc.password_mismatch,
+          type: DialogType.error,
+          btnColor: Colors.red,
+        );
         return;
       }
 
+      final passwords = PasswordChange(
+        password: _passwordController.text.trim(),
+        newPassword: _passwordNewController.text.trim(),
+        confirmPassword: _confirmPasswordController.text.trim(),
+      );
+
       try {
-        final resp = await updateUser(user.id, user, accessToken);
-
-        if (resp.statusCode == 200) {
-          AwesomeDialog(
-            context: context,
-            dialogType: DialogType.success,
-            animType: AnimType.rightSlide,
-            title: loc.user_updated,
-            desc: loc.user_updated_successfully,
-            btnOkOnPress: () {
-              Navigator.pop(context, user);
-            },
-            btnOkColor: Colors.green,
-          ).show();
-        } else {
-          String errorMessage = resp.body.isNotEmpty
-              ? resp.body
-              : 'Error inesperado: Código ${resp.statusCode}';
-
-          await AwesomeDialog(
-            context: context,
-            dialogType: DialogType.error,
-            animType: AnimType.rightSlide,
-            title: loc.error_title,
-            desc: errorMessage,
-            btnOkOnPress: () {
-              Navigator.pop(context);
-            },
-            btnOkColor: Colors.red,
-          ).show();
-        }
-      } catch (e) {
-        AwesomeDialog(
+        await ref
+            .read(userProvider.notifier)
+            .updatePassword(widget.user.id, passwords);
+        _showDialog(
           context: context,
-          dialogType: DialogType.error,
-          title: 'Error',
-          desc: e.toString(),
-          btnOkOnPress: () {},
-        ).show();
+          title: loc.success_title,
+          description: loc.password_updated,
+          type: DialogType.success,
+          btnColor: Colors.green,
+          onOk: () {
+            _passwordController.clear();
+            _passwordNewController.clear();
+            _confirmPasswordController.clear();
+            Navigator.pop(context);
+          },
+        );
+      } catch (e) {
+        _showDialog(
+          context: context,
+          title: loc.error_title,
+          description: e.toString(),
+          type: DialogType.error,
+          btnColor: Colors.red,
+        );
       }
     }
   }
 
-  void _getDominios() async {
-    try {
-      final resp = await getDominios(accessToken);
-
-      setState(() {
-        listDominios = resp;
-
-        _selectedDomain = listDominios
-            .firstWhere(
-              (dom) => dom['Domain'] == _dominioController.text,
-              orElse: () => null,
-            )
-            .toString();
-      });
-    } catch (e) {
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.error,
-        title: 'Error',
-        desc: e.toString(),
-        btnOkOnPress: () {},
-        btnOkColor: Colors.red,
-      ).show();
-    }
+  // Función auxiliar para mostrar diálogos
+  void _showDialog({
+    required BuildContext context,
+    required String title,
+    required String description,
+    DialogType type = DialogType.info,
+    Color? btnColor,
+    VoidCallback? onOk,
+  }) {
+    AwesomeDialog(
+      context: context,
+      dialogType: type,
+      title: title,
+      desc: description,
+      btnOkOnPress: onOk ?? () {},
+      btnOkColor: btnColor,
+    ).show();
   }
 
   @override
@@ -191,6 +213,8 @@ class _AddUserFormState extends ConsumerState<UpdateUserForm> {
     final title = loc.edit_user_title;
     final btnText = loc.update_button;
 
+    final dominiosAsync = ref.watch(dominiosProvider);
+
     return DefaultTabController(
       length: 2, // Dos pestañas: General y Contraseña
       child: Scaffold(
@@ -204,7 +228,6 @@ class _AddUserFormState extends ConsumerState<UpdateUserForm> {
               letterSpacing: 1.2,
             ),
           ),
-
           backgroundColor: const Color.fromARGB(255, 54, 84, 255),
           centerTitle: true,
           shape: const RoundedRectangleBorder(
@@ -215,266 +238,288 @@ class _AddUserFormState extends ConsumerState<UpdateUserForm> {
           ),
           iconTheme: const IconThemeData(color: Colors.white),
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              ButtonOptions(),
-              const SizedBox(height: 16),
 
-              // ------------------ Tabs ------------------
-              DefaultTabController(
-                length: 2,
-                child: Column(
-                  children: [
-                    TabBar(
-                      labelColor: Colors.blue,
-                      unselectedLabelColor: Colors.grey,
-                      indicatorColor: Colors.blue,
-                      tabs: const [
-                        Tab(text: 'General'),
-                        Tab(text: 'Contraseña'),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
+        body: dominiosAsync.when(
+          data: (dominios) => SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                ButtonOptions(),
+                const SizedBox(height: 16),
 
-                    // ------------------ Contenido de Tabs ------------------
-                    SizedBox(
-                      height:
-                          600, // Ajusta según tu contenido o usa Expanded si está dentro de Column
-                      child: TabBarView(
-                        children: [
-                          // ------------------ TAB 1: General ------------------
-                          SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                Card(
-                                  elevation: 5,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                    side: const BorderSide(
-                                      color: Color.fromARGB(255, 61, 130, 240),
-                                      width: 2,
+                // ------------------ Tabs ------------------
+                DefaultTabController(
+                  length: 2,
+                  child: Column(
+                    children: [
+                      TabBar(
+                        labelColor: Colors.blue,
+                        unselectedLabelColor: Colors.grey,
+                        indicatorColor: Colors.blue,
+                        tabs: const [
+                          Tab(text: 'General'),
+                          Tab(text: 'Contraseña'),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      SizedBox(
+                        height: 600,
+                        child: TabBarView(
+                          children: [
+                            // ------------------ TAB 1: General ------------------
+                            SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  Card(
+                                    elevation: 5,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      side: const BorderSide(
+                                        color: Color.fromARGB(
+                                          255,
+                                          61,
+                                          130,
+                                          240,
+                                        ),
+                                        width: 2,
+                                      ),
                                     ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(20.0),
-                                    child: Form(
-                                      key: _formKey,
-                                      child: Column(
-                                        children: [
-                                          CustomTextFormField(
-                                            controller: _loginController,
-                                            label: loc.label_login,
-                                            hint: loc.hint_login,
-                                            icon: Icons.person,
-                                            validator: (value) =>
-                                                value == null || value.isEmpty
-                                                ? loc.field_required
-                                                : null,
-                                          ),
-                                          const SizedBox(height: 16),
-                                          CustomTextFormField(
-                                            controller: _groupController,
-                                            label: loc.label_group,
-                                            hint: loc.hint_group,
-                                            icon: Icons.group,
-                                            validator: (value) =>
-                                                value == null || value.isEmpty
-                                                ? loc.field_required
-                                                : null,
-                                          ),
-                                          const SizedBox(height: 16),
-                                          DropdownButtonFormField<String>(
-                                            decoration: InputDecoration(
-                                              labelText:
-                                                  loc.label_domain, //'Dominio',
-                                              labelStyle: const TextStyle(
-                                                color: Color.fromARGB(
-                                                  255,
-                                                  25,
-                                                  0,
-                                                  255,
-                                                ),
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              hintText: loc
-                                                  .domain_required, //'Selecciona un dominio',
-                                              hintStyle: const TextStyle(
-                                                color: Colors.grey,
-                                              ),
-                                              prefixIcon: const Icon(
-                                                Icons.domain,
-                                                color: Color.fromARGB(
-                                                  255,
-                                                  0,
-                                                  0,
-                                                  0,
-                                                ),
-                                              ),
-                                              enabledBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                borderSide: const BorderSide(
-                                                  color: Color.fromARGB(
-                                                    255,
-                                                    61,
-                                                    130,
-                                                    240,
-                                                  ),
-                                                  width: 1.5,
-                                                ),
-                                              ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                borderSide: const BorderSide(
-                                                  color: Color.fromARGB(
-                                                    255,
-                                                    61,
-                                                    130,
-                                                    240,
-                                                  ),
-                                                  width: 2,
-                                                ),
-                                              ),
-                                              errorBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                borderSide: const BorderSide(
-                                                  color: Colors.red,
-                                                  width: 1.5,
-                                                ),
-                                              ),
-                                              focusedErrorBorder:
-                                                  OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          12,
-                                                        ),
-                                                    borderSide:
-                                                        const BorderSide(
-                                                          color: Colors.red,
-                                                          width: 2,
-                                                        ),
-                                                  ),
-                                              filled: true,
-                                              fillColor: const Color.fromARGB(
-                                                255,
-                                                255,
-                                                255,
-                                                255,
-                                              ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(20.0),
+                                      child: Form(
+                                        key: _generalFormKey,
+                                        child: Column(
+                                          children: [
+                                            CustomTextFormField(
+                                              controller: _loginController,
+                                              label: loc.label_login,
+                                              hint: loc.hint_login,
+                                              icon: Icons.person,
+                                              validator: (value) =>
+                                                  value == null || value.isEmpty
+                                                  ? loc.field_required
+                                                  : null,
                                             ),
-                                            value: '1',
-                                            //value: _dominioController.text,
-                                            items: listDominios
-                                                .map<DropdownMenuItem<String>>((
-                                                  dom,
-                                                ) {
-                                                  return DropdownMenuItem<
-                                                    String
-                                                  >(
-                                                    value: dom['ID'].toString(),
-                                                    child: Text(dom['Domain']),
-                                                  );
-                                                })
-                                                .toList(),
-                                            onChanged: (value) {
-                                              setState(() {
-                                                _selectedDomain = value;
-                                                final domSeleccionado =
-                                                    listDominios.firstWhere(
-                                                      (dom) =>
-                                                          dom['ID']
-                                                              .toString() ==
-                                                          value,
+                                            const SizedBox(height: 16),
+                                            CustomTextFormField(
+                                              controller: _groupController,
+                                              label: loc.label_group,
+                                              hint: loc.hint_group,
+                                              icon: Icons.group,
+                                              validator: (value) =>
+                                                  value == null || value.isEmpty
+                                                  ? loc.field_required
+                                                  : null,
+                                            ),
+                                            const SizedBox(height: 16),
+
+                                            DropdownButtonFormField<String>(
+                                              decoration: InputDecoration(
+                                                labelText: loc.label_domain,
+                                                labelStyle: const TextStyle(
+                                                  color: Color.fromARGB(
+                                                    255,
+                                                    25,
+                                                    0,
+                                                    255,
+                                                  ),
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                hintText: loc.domain_required,
+                                                hintStyle: const TextStyle(
+                                                  color: Colors.grey,
+                                                ),
+                                                prefixIcon: const Icon(
+                                                  Icons.domain,
+                                                  color: Colors.black,
+                                                ),
+                                                enabledBorder:
+                                                    OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                      borderSide:
+                                                          const BorderSide(
+                                                            color:
+                                                                Color.fromARGB(
+                                                                  255,
+                                                                  61,
+                                                                  130,
+                                                                  240,
+                                                                ),
+                                                            width: 1.5,
+                                                          ),
+                                                    ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                      borderSide:
+                                                          const BorderSide(
+                                                            color:
+                                                                Color.fromARGB(
+                                                                  255,
+                                                                  61,
+                                                                  130,
+                                                                  240,
+                                                                ),
+                                                            width: 2,
+                                                          ),
+                                                    ),
+                                                errorBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  borderSide: const BorderSide(
+                                                    color: Colors.red,
+                                                    width: 1.5,
+                                                  ),
+                                                ),
+                                                focusedErrorBorder:
+                                                    OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                      borderSide:
+                                                          const BorderSide(
+                                                            color: Colors.red,
+                                                            width: 2,
+                                                          ),
+                                                    ),
+                                                filled: true,
+                                                fillColor: Colors.white,
+                                              ),
+                                              value: (widget.user.dominio)
+                                                  .toString(),
+                                              items: dominios
+                                                  .map<
+                                                    DropdownMenuItem<String>
+                                                  >((dom) {
+                                                    return DropdownMenuItem<
+                                                      String
+                                                    >(
+                                                      value: dom['ID']
+                                                          .toString(),
+                                                      child: Text(
+                                                        dom['Domain'],
+                                                      ),
                                                     );
-                                                _dominioController.text =
-                                                    domSeleccionado['Domain'];
-                                              });
-                                            },
-                                            validator: (value) => value == null
-                                                ? loc.hint_domain
-                                                : null,
-                                          ),
-                                          const SizedBox(height: 16),
-                                          CustomTextFormField(
-                                            controller: _quotaController,
-                                            label: loc.label_quota,
-                                            hint: loc.hint_quota,
-                                            icon: Icons.storage,
-                                            keyboardType: TextInputType.number,
-                                            validator: (value) =>
-                                                value == null || value.isEmpty
-                                                ? loc.field_required
-                                                : null,
-                                          ),
-                                          const SizedBox(height: 16),
-                                          CustomTextFormField(
-                                            controller: _emailController,
-                                            label: loc.email,
-                                            hint: '',
-                                            icon: Icons.email,
-                                            readOnly: true,
-                                            validator: (value) =>
-                                                value == null || value.isEmpty
-                                                ? loc.field_required
-                                                : null,
-                                          ),
-                                        ],
+                                                  })
+                                                  .toList(),
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  _selectedDomain = value;
+                                                  final domSeleccionado =
+                                                      dominios.firstWhere(
+                                                        (dom) =>
+                                                            dom['ID']
+                                                                .toString() ==
+                                                            value,
+                                                      );
+                                                  _dominioController.text =
+                                                      domSeleccionado['Domain'];
+                                                });
+                                              },
+                                              validator: (value) =>
+                                                  value == null
+                                                  ? loc.hint_domain
+                                                  : null,
+                                            ),
+
+                                            const SizedBox(height: 16),
+                                            CustomTextFormField(
+                                              controller: _quotaController,
+                                              label: loc.label_quota,
+                                              hint: loc.hint_quota,
+                                              icon: Icons.storage,
+                                              keyboardType:
+                                                  TextInputType.number,
+                                              validator: (value) =>
+                                                  value == null || value.isEmpty
+                                                  ? loc.field_required
+                                                  : null,
+                                            ),
+                                            const SizedBox(height: 16),
+                                            CustomTextFormField(
+                                              controller: _emailController,
+                                              label: loc.email,
+                                              hint: '',
+                                              icon: Icons.email,
+                                              readOnly: true,
+                                              validator: (value) =>
+                                                  value == null || value.isEmpty
+                                                  ? loc.field_required
+                                                  : null,
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SingleChildScrollView(
-                            child: Card(
-                              elevation: 5,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                side: const BorderSide(
-                                  color: Color.fromARGB(255, 61, 130, 240),
-                                  width: 2,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: Column(
-                                  children: [
-                                    PasswordField(
-                                      label_text: loc.old_password,
-                                      controller: _passwordController,
-                                      edit: true,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    PasswordField(
-                                      label_text: loc.new_password,
-                                      controller: _passwordController,
-                                      edit: true,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    ConfirmPasswordField(
-                                      controller: _confirmPasswordController,
-                                      originalPasswordController:
-                                          _passwordController,
-                                      edit: true,
-                                    ),
-                                  ],
-                                ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
+
+                            // ------------------ TAB 2: Contraseña ------------------
+                            SingleChildScrollView(
+                              child: Card(
+                                elevation: 5,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  side: const BorderSide(
+                                    color: Color.fromARGB(255, 61, 130, 240),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Form(
+                                    key: _passwordFormKey,
+                                    child: Column(
+                                      children: [
+                                        PasswordField(
+                                          label_text: loc.old_password,
+                                          controller: _passwordController,
+                                          edit: true,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        PasswordField(
+                                          label_text: loc.new_password,
+                                          controller: _passwordNewController,
+                                          edit: true,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        ConfirmPasswordField(
+                                          controller:
+                                              _confirmPasswordController,
+                                          originalPasswordController:
+                                              _passwordNewController,
+                                          edit: true,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+
+          // ------------------ Botones abajo ------------------
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, _) =>
+              Center(child: Text('Error al cargar dominios: $err')),
         ),
 
         bottomNavigationBar: Padding(
@@ -483,7 +528,7 @@ class _AddUserFormState extends ConsumerState<UpdateUserForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                onPressed: _submitForm,
+                onPressed: () => _submitForm(ref),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 39, 122, 47),
                   foregroundColor: Colors.white,
