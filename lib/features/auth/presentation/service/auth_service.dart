@@ -149,6 +149,56 @@ class AuthService {
   }
 }
 
+// Future<void> logout(BuildContext context, {bool isZitadel = false}) async {
+//   final prefs = await SharedPreferences.getInstance();
+
+//   if (isZitadel) {
+//     final idToken = prefs.getString('id_token') ?? '';
+//     const redirectUri = 'com.practiceacountmanager.app://callback';
+
+//     final logoutUrl = Uri.parse(
+//       'https://adminemail-prueba-ftulnf.us1.zitadel.cloud/oidc/v1/end_session'
+//       '?id_token_hint=$idToken'
+//       '&post_logout_redirect_uri=$redirectUri',
+//     );
+
+//     await prefs.clear();
+
+//     if (await canLaunchUrl(logoutUrl)) {
+//       await launchUrl(logoutUrl, mode: LaunchMode.externalApplication);
+//     } else {
+//       debugPrint('No se pudo abrir el navegador para cerrar sesión en Zitadel');
+//     }
+//   } else {
+//     // Logout local
+//     final token = prefs.getString('access_token') ?? '';
+//     final String apiService = dotenv.env['API_SERVICE'] ?? '';
+//     try {
+//       await http.post(
+//         Uri.parse('$apiService/user/logout'),
+//         headers: {
+//           'Accept': 'application/json',
+//           'Content-Type': 'application/json',
+//           'X-Client-Type': 'mobile',
+//           if (token.isNotEmpty) 'Authorization': 'Bearer $token',
+//         },
+//       );
+//     } catch (e) {
+//       debugPrint('Error logout local: $e');
+//     }
+
+//     await prefs.clear();
+//   }
+
+//   // Navegar a la pantalla de login eliminando historial
+//   if (context.mounted) {
+//     Navigator.of(context).pushAndRemoveUntil(
+//       MaterialPageRoute(builder: (_) => const SelectLoginPage()),
+//       (route) => false,
+//     );
+//   }
+// }
+
 Future<void> logout(BuildContext context) async {
   final prefs = await SharedPreferences.getInstance();
   final idToken = prefs.getString('id_token') ?? '';

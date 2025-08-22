@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:practice_acount_manager/features/aliases/data/alias_service.dart';
 import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
+import 'package:practice_acount_manager/features/aliases/providers/alias_provider.dart';
+import 'package:practice_acount_manager/features/core/validators/validators.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_aliase_navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_cancel.dart';
 import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
@@ -37,97 +38,82 @@ class _AddAliasFormState extends ConsumerState<AddAliasForm> {
     final loc = AppLocalizations.of(context)!;
     final id = int.tryParse(_idController.text.trim()) ?? 0;
 
-    if (_formKey.currentState!.validate()) {
-      final updateAliases = Aliases(
-        id: int.tryParse(_idController.text.trim()) ?? 0,
-        local: _localController.text.trim(),
-        remoto: _remotoController.text.trim(),
-      );
+    //if (_formKey.currentState!.validate()) {
+    final alias = Aliases(
+      id: int.tryParse(_idController.text.trim()) ?? 0,
+      local: _localController.text.trim(),
+      remoto: _remotoController.text.trim(),
+    );
 
-      if (widget.isEditing) {
-        try {
-          // final resp = await updateAlias(id, updateAliases, accessToken);
+    final (_, errors) = aliasFormSchema.validateSync(alias.toMap());
 
-          // if (resp.statusCode == 200 || resp.statusCode == 201) {
-          //   await AwesomeDialog(
-          //     context: context,
-          //     dialogType: DialogType.success,
-          //     animType: AnimType.rightSlide,
-          //     title: loc.alias_updated,
-          //     desc: loc.alias_updated_successfully,
-          //     btnOkOnPress: () {
-          //       Navigator.pop(context, updateAliases);
-          //     },
-          //     btnOkColor: Colors.blue,
-          //   ).show();
-          // } else {
-          //   String errorMessage = resp.body.isNotEmpty
-          //       ? resp.body
-          //       : 'Error inesperado: Código ${resp.statusCode}';
+    if (errors.isNotEmpty) {
+      final firstKey = errors.keys.first;
+      final firstMessage = errors[firstKey];
 
-          //   await AwesomeDialog(
-          //     context: context,
-          //     dialogType: DialogType.error,
-          //     animType: AnimType.rightSlide,
-          //     title: loc.error_title,
-          //     desc: errorMessage,
-          //     btnOkOnPress: () {
-          //       Navigator.pop(context);
-          //     },
-          //     btnOkColor: Colors.red,
-          //   ).show();
-          // }
-        } catch (e) {
-          await AwesomeDialog(
-            context: context,
-            dialogType: DialogType.error,
-            animType: AnimType.rightSlide,
-            title: loc.error_title,
-            desc: 'Error al actualizar alias: $e',
-            btnOkOnPress: () {
-              Navigator.pop(context);
-            },
-            btnOkColor: Colors.red,
-          ).show();
-        }
-      } else {
-        // final resp = await saveAlias(updateAliases, accessToken);
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        title: 'Error',
+        desc: firstMessage ?? 'Error en el formulario',
+        btnOkOnPress: () {},
+        btnOkColor: Colors.red,
+      ).show();
+      return;
+    }
 
-        // if (resp.statusCode == 200) {
-        //   AwesomeDialog(
-        //     context: context,
-        //     dialogType: DialogType.success,
-        //     animType: AnimType.rightSlide,
-        //     title: loc.success_title,
-        //     desc: loc.alias_added_successfully,
-        //     btnOkOnPress: () {
-        //       _formKey.currentState!.reset();
-        //       _localController.clear();
-        //       _remotoController.clear();
-        //     },
-        //     btnOkColor: Colors.green,
-        //   ).show();
-        // } else {
-        //   String errorMessage = resp.body.isNotEmpty
-        //       ? resp.body
-        //       : 'Error inesperado: Código ${resp.statusCode}';
+    if (widget.isEditing) {
+      try {
+        await ref.read(aliasProvider.notifier).updateAlias(alias, id);
 
-        //   AwesomeDialog(
-        //     context: context,
-        //     dialogType: DialogType.error,
-        //     animType: AnimType.rightSlide,
-        //     title: loc.error_title,
-        //     desc: errorMessage,
-        //     btnOkOnPress: () {
-        //       // _formKey.currentState!.reset();
-        //       // _localController.clear();
-        //       // _remotoController.clear();
-        //     },
-        //     btnOkColor: Colors.red,
-        //   ).show();
-        // }
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.success,
+          animType: AnimType.rightSlide,
+          title: loc.alias_updated,
+          desc: loc.alias_updated_successfully,
+          btnOkOnPress: () {
+            Navigator.pop(context);
+          },
+          btnOkColor: Colors.blue,
+        ).show();
+      } catch (e) {
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.error,
+          title: loc.error_title,
+          desc: e.toString(),
+          btnOkOnPress: () {},
+        ).show();
+      }
+    } else {
+      try {
+        await ref.read(aliasProvider.notifier).addAlias(alias);
+
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.success,
+          animType: AnimType.rightSlide,
+          title: loc.success_title,
+          desc: loc.alias_added_successfully,
+          btnOkOnPress: () {
+            _formKey.currentState!.reset();
+            _localController.clear();
+            _remotoController.clear();
+          },
+          btnOkColor: Colors.green,
+        ).show();
+      } catch (e) {
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.error,
+          title: loc.error_title,
+          desc: e.toString(),
+          btnOkOnPress: () {},
+        ).show();
       }
     }
+    //}
   }
 
   @override

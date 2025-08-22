@@ -16,4 +16,8 @@ class Aliases {
   Map<String, dynamic> toJson() {
     return {'local': local, 'remoto': remoto, 'id': id};
   }
+
+  Map<String, dynamic> toMap() {
+    return {'local': local, 'remoto': remoto, 'id': id};
+  }
 }

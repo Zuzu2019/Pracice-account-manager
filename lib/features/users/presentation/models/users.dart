@@ -50,4 +50,17 @@ class User {
       'quota': quota,
     };
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "login": login,
+      "email": email,
+      "password": password,
+      "maildir": maildir,
+      "identificacion": identificacion,
+      "grupo": grupo,
+      "dominio": dominio,
+      "quota": quota,
+    };
+  }
 }

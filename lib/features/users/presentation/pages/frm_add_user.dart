@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:practice_acount_manager/features/core/validators/validators.dart';
 import 'package:practice_acount_manager/features/dominios/provider/dominio_service.dart';
-import 'package:practice_acount_manager/features/users/data/users_service.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_confirm_user.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 import 'package:practice_acount_manager/features/users/provider/user_provider.dart';
@@ -72,59 +72,76 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
   void _submitForm(BuildContext context) async {
     final loc = AppLocalizations.of(context)!;
 
-    if (_formKey.currentState!.validate()) {
-      final userAdd = User(
-        dominio: int.tryParse(_selectedDomain ?? '0') ?? 0,
-        id: 0,
-        login: _loginController.text.trim(),
-        password: _passwordController.text.trim(),
-        email: _emailController.text.trim(),
-        maildir: '/prueba',
-        identificacion: _identificacionController.text.trim(),
-        grupo: _groupController.text.trim(),
-        quota: int.tryParse(_quotaController.text.trim()) ?? 0,
-      );
+    //if (_formKey.currentState!.validate()) {
+    final userAdd = User(
+      dominio: int.tryParse(_selectedDomain ?? '0') ?? 0,
+      id: 0,
+      login: _loginController.text.trim(),
+      password: _passwordController.text.trim(),
+      email: _emailController.text.trim(),
+      maildir: '/prueba',
+      identificacion: _identificacionController.text.trim(),
+      grupo: _groupController.text.trim(),
+      quota: int.tryParse(_quotaController.text.trim()) ?? 0,
+    );
 
-      if (_passwordController.text != _confirmPasswordController.text) {
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.error,
-          title: loc.error_title,
-          desc: loc.password_mismatch,
-          btnOkOnPress: () {},
-        ).show();
-        return;
-      }
+    final (_, errors) = usersFormSchema.validateSync(userAdd.toMap());
 
-      try {
-        await ref.read(userProvider.notifier).addUsers(userAdd);
+    if (errors.isNotEmpty) {
+      // Mostrar primer error
+      final firstKey = errors.keys.first;
+      final firstMessage = errors[firstKey];
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        title: 'Error',
+        desc: firstMessage ?? 'Error en el formulario',
+        btnOkOnPress: () {},
+        btnOkColor: Colors.red,
+      ).show();
+      return;
+    }
 
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.success,
-          title: loc.success_title,
-          desc: loc.user_added_successfully,
-          btnOkOnPress: () {
-            _formKey.currentState!.reset();
-            _loginController.clear();
-            _passwordController.clear();
-            _confirmPasswordController.clear();
-            _identificacionController.clear();
-            _groupController.clear();
-            _quotaController.clear();
-            Navigator.pop(context);
-          },
-          btnOkColor: Colors.green,
-        ).show();
-      } catch (e) {
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.error,
-          title: loc.error_title,
-          desc: e.toString(),
-          btnOkOnPress: () {},
-        ).show();
-      }
+    if (_passwordController.text != _confirmPasswordController.text) {
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        title: loc.error_title,
+        desc: loc.password_mismatch,
+        btnOkOnPress: () {},
+      ).show();
+      return;
+    }
+
+    try {
+      await ref.read(userProvider.notifier).addUsers(userAdd);
+
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.success,
+        title: loc.success_title,
+        desc: loc.user_added_successfully,
+        btnOkOnPress: () {
+          _formKey.currentState!.reset();
+          _loginController.clear();
+          _passwordController.clear();
+          _confirmPasswordController.clear();
+          _identificacionController.clear();
+          _groupController.clear();
+          _quotaController.clear();
+          Navigator.pop(context);
+        },
+        btnOkColor: Colors.green,
+      ).show();
+    } catch (e) {
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        title: loc.error_title,
+        desc: e.toString(),
+        btnOkOnPress: () {},
+        btnOkColor: Colors.red,
+      ).show();
     }
   }
 
@@ -196,9 +213,13 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
                           label: loc.label_login,
                           hint: loc.hint_login,
                           icon: Icons.person,
-                          validator: (value) => value == null || value.isEmpty
-                              ? loc.field_required
-                              : null,
+                          validator: (value) {
+                            // final isValid =
+                            //     usersFormSchema['login'].validate(value) ??
+                            //     false;
+                            // if (!isValid) return 'Login invalido';
+                            // return null;
+                          },
                         ),
 
                         const SizedBox(height: 16),

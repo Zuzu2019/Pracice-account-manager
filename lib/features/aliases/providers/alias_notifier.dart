@@ -14,12 +14,14 @@ class AliasNotifier extends StateNotifier<AsyncValue<List<Aliases>>> {
     fetchAlias();
   }
 
-  Future<void> fetchAlias() async {
-    state = const AsyncValue.loading();
-    try {
-      final token = _ref.read(authProvider).accessToken;
-      final aliases = await _service.getAlias(token);
+  AuthState get _auth => _ref.read(authProvider);
 
+  Future<void> fetchAlias() async {
+    try {
+      final aliases = await _service.getAlias(
+        _auth.accessToken,
+        _auth.refreshToken,
+      );
       _allAlias = aliases;
       _applyFilter();
     } catch (e, st) {
@@ -28,32 +30,52 @@ class AliasNotifier extends StateNotifier<AsyncValue<List<Aliases>>> {
   }
 
   Future<void> addAlias(Aliases alias) async {
-    state = const AsyncValue.loading();
     try {
-      final token = _ref.read(authProvider).accessToken;
-      await _service.saveAlias(alias, token);
-      await fetchAlias();
+      final response = await _service.saveAlias(
+        alias,
+        _auth.accessToken,
+        _auth.refreshToken,
+      );
+
+      if (response.statusCode == 200) {
+        await fetchAlias();
+      } else {
+        final body = response.body;
+        throw Exception('Error ${response.statusCode}: $body');
+      }
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+      rethrow;
     }
   }
 
   Future<void> updateAlias(Aliases alias, int id) async {
-    state = const AsyncValue.loading();
     try {
-      final token = _ref.read(authProvider).accessToken;
-      await _service.updateAlias(id, alias, token);
-      await fetchAlias();
+      final response = await _service.updateAlias(
+        id,
+        alias,
+        _auth.accessToken,
+        _auth.refreshToken,
+      );
+      if (response.statusCode == 200) {
+        await fetchAlias();
+      } else {
+        final body = response.body;
+        throw Exception('Error ${response.statusCode}: $body');
+      }
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+      rethrow;
     }
   }
 
   Future<bool> deleteAlias(int id) async {
-    state = const AsyncValue.loading();
     try {
-      final token = _ref.read(authProvider).accessToken;
-      final resp = await _service.deleteAlias(id, token);
+      final resp = await _service.deleteAlias(
+        id,
+        _auth.accessToken,
+        _auth.refreshToken,
+      );
 
       if (resp.statusCode == 200) {
         state = state.whenData(
@@ -82,5 +104,10 @@ class AliasNotifier extends StateNotifier<AsyncValue<List<Aliases>>> {
           }).toList();
 
     state = AsyncValue.data(filtered);
+  }
+
+  Future<void> reload() async {
+    state = const AsyncValue.loading();
+    await fetchAlias();
   }
 }

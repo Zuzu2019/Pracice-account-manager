@@ -51,6 +51,8 @@ dependencies:
   app_links: ^6.4.0
   webview_flutter: ^4.13.0
   flutter_gcaptcha_v3: ^2.1.1
+  ez_validator: ^0.3.6
+  infinite_scroll_pagination: ^5.1.0
 
 dev_dependencies:
   flutter_test:

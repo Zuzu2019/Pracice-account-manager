@@ -1,0 +1,166 @@
+{
+    "TotalCount": 211,
+    "TotalPages": 22,
+    "Users": [
+        {
+            "ID": 11,
+            "Userid": 65000,
+            "Login": "javi",
+            "Email": "javi@midominio.com",
+            "Maildir": "/prueba",
+            "Identificacion": "D",
+            "Grupo": "DC",
+            "Dominio": 2,
+            "Quota": 200,
+            "Transport": {
+                "ID": 2,
+                "Domain": "@midominio.com",
+                "Transport": ""
+            }
+        },
+        {
+            "ID": 212,
+            "Userid": 65000,
+            "Login": "ricardo.hernandez",
+            "Email": "ricardo.hernandez@github.com",
+            "Maildir": "/var/mail/ricardo.hernandez/",
+            "Identificacion": "id001",
+            "Grupo": "grupo3",
+            "Dominio": 1,
+            "Quota": 30000000,
+            "Transport": {
+                "ID": 1,
+                "Domain": "@example.com",
+                "Transport": ""
+            }
+        },
+        {
+            "ID": 213,
+            "Userid": 65000,
+            "Login": "jorge.sanchez",
+            "Email": "jorge.sanchez@microsoft.com",
+            "Maildir": "/var/mail/jorge.sanchez/",
+            "Identificacion": "id002",
+            "Grupo": "grupo3",
+            "Dominio": 1,
+            "Quota": 30000000,
+            "Transport": {
+                "ID": 1,
+                "Domain": "@example.com",
+                "Transport": ""
+            }
+        },
+        {
+            "ID": 214,
+            "Userid": 65000,
+            "Login": "fernando.gomez",
+            "Email": "fernando.gomez@example.com",
+            "Maildir": "/var/mail/fernando.gomez/",
+            "Identificacion": "id003",
+            "Grupo": "grupo3",
+            "Dominio": 1,
+            "Quota": 30000000,
+            "Transport": {
+                "ID": 1,
+                "Domain": "@example.com",
+                "Transport": ""
+            }
+        },
+        {
+            "ID": 215,
+            "Userid": 65000,
+            "Login": "ricardo.lopez",
+            "Email": "ricardo.lopez@amazon.com",
+            "Maildir": "/var/mail/ricardo.lopez/",
+            "Identificacion": "id004",
+            "Grupo": "grupo4",
+            "Dominio": 1,
+            "Quota": 30000000,
+            "Transport": {
+                "ID": 1,
+                "Domain": "@example.com",
+                "Transport": ""
+            }
+        },
+        {
+            "ID": 216,
+            "Userid": 65000,
+            "Login": "carolina.gomez",
+            "Email": "carolina.gomez@outlook.com",
+            "Maildir": "/var/mail/carolina.gomez/",
+            "Identificacion": "id005",
+            "Grupo": "grupo2",
+            "Dominio": 1,
+            "Quota": 30000000,
+            "Transport": {
+                "ID": 1,
+                "Domain": "@example.com",
+                "Transport": ""
+            }
+        },
+        {
+            "ID": 217,
+            "Userid": 65000,
+            "Login": "jose.lopez",
+            "Email": "jose.lopez@openai.com",
+            "Maildir": "/var/mail/jose.lopez/",
+            "Identificacion": "id006",
+            "Grupo": "grupo4",
+            "Dominio": 1,
+            "Quota": 30000000,
+            "Transport": {
+                "ID": 1,
+                "Domain": "@example.com",
+                "Transport": ""
+            }
+        },
+        {
+            "ID": 218,
+            "Userid": 65000,
+            "Login": "ricardo.hernandez",
+            "Email": "ricardo.hernandez@netflix.com",
+            "Maildir": "/var/mail/ricardo.hernandez/",
+            "Identificacion": "id007",
+            "Grupo": "grupo4",
+            "Dominio": 1,
+            "Quota": 30000000,
+            "Transport": {
+                "ID": 1,
+                "Domain": "@example.com",
+                "Transport": ""
+            }
+        },
+        {
+            "ID": 219,
+            "Userid": 65000,
+            "Login": "maria.gomez",
+            "Email": "maria.gomez@example.com",
+            "Maildir": "/var/mail/maria.gomez/",
+            "Identificacion": "id008",
+            "Grupo": "grupo1",
+            "Dominio": 1,
+            "Quota": 30000000,
+            "Transport": {
+                "ID": 1,
+                "Domain": "@example.com",
+                "Transport": ""
+            }
+        },
+        {
+            "ID": 220,
+            "Userid": 65000,
+            "Login": "fernando.martinez",
+            "Email": "fernando.martinez@outlook.com",
+            "Maildir": "/var/mail/fernando.martinez/",
+            "Identificacion": "id009",
+            "Grupo": "grupo2",
+            "Dominio": 1,
+            "Quota": 30000000,
+            "Transport": {
+                "ID": 1,
+                "Domain": "@example.com",
+                "Transport": ""
+            }
+        }
+    ]
+}

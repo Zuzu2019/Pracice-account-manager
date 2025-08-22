@@ -74,7 +74,6 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     </html>
     """;
 
-    // Canal para recibir el token
     _controller.addJavaScriptChannel(
       'Recaptcha',
       onMessageReceived: (message) {
@@ -114,8 +113,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         final data = jsonDecode(resp.body) as Map<String, dynamic>;
 
         authNotifier.setTokens(
-          accessToken: data['access_token'],
-          refreshToken: data['refresh_token'],
+          accessToken: data['access'],
+          refreshToken: data['refresh'],
         );
 
         Navigator.pushReplacement(

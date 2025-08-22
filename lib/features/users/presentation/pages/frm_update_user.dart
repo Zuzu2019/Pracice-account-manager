@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:practice_acount_manager/features/core/validators/validators.dart';
 import 'package:practice_acount_manager/features/dominios/provider/dominio_service.dart';
-import 'package:practice_acount_manager/features/users/data/users_service.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_confirm_user.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/password.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 import 'package:practice_acount_manager/features/users/provider/user_provider.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_cancel.dart';
 import 'package:practice_acount_manager/features/widgets/generals/button_user_navigation.dart';
-import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
 import 'package:practice_acount_manager/features/users/presentation/components/input_password_user.dart';
 import 'package:practice_acount_manager/features/widgets/generals/text_form_field.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
@@ -82,43 +81,59 @@ class _AddUserFormState extends ConsumerState<UpdateUserForm> {
 
   void _submitForm(WidgetRef ref) async {
     final loc = AppLocalizations.of(context)!;
-
-    // --- Actualización de datos generales ---
     final isGeneralValid = _generalFormKey.currentState?.validate() ?? false;
-    if (isGeneralValid) {
-      final user = User(
-        dominio: int.tryParse(_selectedDomain ?? '0') ?? 0,
-        id: widget.user.id,
-        login: _loginController.text.trim(),
-        password: _passwordController.text.trim(),
-        email: _emailController.text.trim(),
-        maildir: '',
-        identificacion: _identificacionController.text.trim(),
-        grupo: _groupController.text.trim(),
-        quota: int.tryParse(_quotaController.text.trim()) ?? 0,
-      );
 
-      try {
-        await ref.read(userProvider.notifier).updateUsers(user, user.id);
-        _showDialog(
-          context: context,
-          title: loc.user_updated,
-          description: loc.user_updated_successfully,
-          type: DialogType.success,
-          btnColor: Colors.green,
-          onOk: () => Navigator.pop(context),
-        );
-      } catch (e) {
-        _showDialog(
-          context: context,
-          title: loc.error_title,
-          description: e.toString(),
-          type: DialogType.error,
-          btnColor: Colors.red,
-          onOk: () => Navigator.pop(context),
-        );
-      }
+    //if (isGeneralValid) {
+
+    final user = User(
+      dominio: int.tryParse(_selectedDomain ?? '0') ?? 0,
+      id: widget.user.id,
+      login: _loginController.text.trim(),
+      password: _passwordController.text.trim(),
+      email: _emailController.text.trim(),
+      maildir: '',
+      identificacion: _identificacionController.text.trim(),
+      grupo: _groupController.text.trim(),
+      quota: int.tryParse(_quotaController.text.trim()) ?? 0,
+    );
+
+    final (_, errors) = usersFormSchema.validateSync(user.toMap());
+
+    if (errors.isNotEmpty) {
+      // Mostrar primer error
+      final firstKey = errors.keys.first;
+      final firstMessage = errors[firstKey];
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        title: 'Error',
+        desc: firstMessage ?? 'Error en el formulario',
+        btnOkOnPress: () {},
+        btnOkColor: Colors.red,
+      ).show();
+      return;
     }
+    try {
+      await ref.read(userProvider.notifier).updateUsers(user, user.id);
+      _showDialog(
+        context: context,
+        title: loc.user_updated,
+        description: loc.user_updated_successfully,
+        type: DialogType.success,
+        btnColor: Colors.green,
+        onOk: () => Navigator.pop(context),
+      );
+    } catch (e) {
+      _showDialog(
+        context: context,
+        title: loc.error_title,
+        description: e.toString(),
+        type: DialogType.error,
+        btnColor: Colors.red,
+        onOk: () => Navigator.pop(context),
+      );
+    }
+    //}
 
     // --- Actualización de contraseña ---
     final hasPasswordInput =

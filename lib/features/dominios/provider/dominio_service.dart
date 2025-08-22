@@ -7,20 +7,22 @@ import 'package:practice_acount_manager/riverpod/auth_provider.dart';
 
 final String apiService = dotenv.env['API_SERVICE'] ?? '';
 
-// Provider que obtiene la lista de dominios
 final dominiosProvider = FutureProvider<List>((ref) async {
-  // Obtén el token desde otro provider si tienes autenticación
-  final token = ref.read(authProvider).accessToken; // ejemplo
+  final token = ref.read(authProvider).accessToken;
+  final tokenRefresh = ref.read(authProvider).accessToken;
   final response = await http.get(
-    Uri.parse('$apiService/transports'),
+    Uri.parse('$apiService/transports/1/40'),
     headers: {
       'Authorization': 'Bearer $token',
+      if (tokenRefresh != null) 'X-Refresh-Token': tokenRefresh,
+      'X-Client-Type': 'mobile',
       'Content-Type': 'application/json',
     },
   );
 
   if (response.statusCode == 200 || response.statusCode == 201) {
-    final List<dynamic> jsonList = jsonDecode(response.body);
+    final Map<String, dynamic> jsonResponse = json.decode(response.body);
+    final List<dynamic> jsonList = jsonResponse["Transports"];
     return jsonList;
   } else {
     throw Exception('Error al obtener los dominios');
