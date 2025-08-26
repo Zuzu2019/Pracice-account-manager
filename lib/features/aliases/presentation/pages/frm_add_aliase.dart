@@ -38,82 +38,65 @@ class _AddAliasFormState extends ConsumerState<AddAliasForm> {
     final loc = AppLocalizations.of(context)!;
     final id = int.tryParse(_idController.text.trim()) ?? 0;
 
-    //if (_formKey.currentState!.validate()) {
-    final alias = Aliases(
-      id: int.tryParse(_idController.text.trim()) ?? 0,
-      local: _localController.text.trim(),
-      remoto: _remotoController.text.trim(),
-    );
+    if (_formKey.currentState!.validate()) {
+      final alias = Aliases(
+        id: int.tryParse(_idController.text.trim()) ?? 0,
+        local: _localController.text.trim(),
+        remoto: _remotoController.text.trim(),
+      );
 
-    final (_, errors) = aliasFormSchema.validateSync(alias.toMap());
+      if (widget.isEditing) {
+        try {
+          await ref.read(aliasProvider.notifier).updateAlias(alias, id);
 
-    if (errors.isNotEmpty) {
-      final firstKey = errors.keys.first;
-      final firstMessage = errors[firstKey];
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.success,
+            animType: AnimType.rightSlide,
+            title: loc.alias_updated,
+            desc: loc.alias_updated_successfully,
+            btnOkOnPress: () {
+              Navigator.pop(context);
+            },
+            btnOkColor: Colors.blue,
+          ).show();
+        } catch (e) {
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.error,
+            title: loc.error_title,
+            desc: e.toString(),
+            btnOkOnPress: () {},
+          ).show();
+        }
+      } else {
+        try {
+          await ref.read(aliasProvider.notifier).addAlias(alias);
 
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.error,
-        title: 'Error',
-        desc: firstMessage ?? 'Error en el formulario',
-        btnOkOnPress: () {},
-        btnOkColor: Colors.red,
-      ).show();
-      return;
-    }
-
-    if (widget.isEditing) {
-      try {
-        await ref.read(aliasProvider.notifier).updateAlias(alias, id);
-
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.success,
-          animType: AnimType.rightSlide,
-          title: loc.alias_updated,
-          desc: loc.alias_updated_successfully,
-          btnOkOnPress: () {
-            Navigator.pop(context);
-          },
-          btnOkColor: Colors.blue,
-        ).show();
-      } catch (e) {
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.error,
-          title: loc.error_title,
-          desc: e.toString(),
-          btnOkOnPress: () {},
-        ).show();
-      }
-    } else {
-      try {
-        await ref.read(aliasProvider.notifier).addAlias(alias);
-
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.success,
-          animType: AnimType.rightSlide,
-          title: loc.success_title,
-          desc: loc.alias_added_successfully,
-          btnOkOnPress: () {
-            _formKey.currentState!.reset();
-            _localController.clear();
-            _remotoController.clear();
-          },
-          btnOkColor: Colors.green,
-        ).show();
-      } catch (e) {
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.error,
-          title: loc.error_title,
-          desc: e.toString(),
-          btnOkOnPress: () {},
-        ).show();
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.success,
+            animType: AnimType.rightSlide,
+            title: loc.success_title,
+            desc: loc.alias_added_successfully,
+            btnOkOnPress: () {
+              _formKey.currentState!.reset();
+              _localController.clear();
+              _remotoController.clear();
+            },
+            btnOkColor: Colors.green,
+          ).show();
+        } catch (e) {
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.error,
+            title: loc.error_title,
+            desc: e.toString(),
+            btnOkOnPress: () {},
+          ).show();
+        }
       }
     }
-    //}
   }
 
   @override

@@ -12,6 +12,11 @@ final userProvider =
     });
 
 final usersPagingProvider = ChangeNotifierProvider<UsersPagingManager>((ref) {
-  final auth = ref.watch(authProvider); // tu AuthState desde Riverpod
-  return UsersPagingManager(auth);
+  final auth = ref.watch(authProvider); // AuthState desde Riverpod
+
+  return UsersPagingManager(
+    service: UsersService(),
+    accessToken: auth.accessToken,
+    refreshToken: auth.refreshToken,
+  );
 });

@@ -43,7 +43,7 @@ class UsersPage extends StatelessWidget {
             const SizedBox(height: 20),
 
             // 🔥 Expandimos el SearchTableUser para que ocupe todo el espacio restante
-            Expanded(child: const SearchTableUser()),
+            Expanded(child: SearchTableUser()),
           ],
         ),
       ),

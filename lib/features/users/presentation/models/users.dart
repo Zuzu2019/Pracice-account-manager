@@ -24,19 +24,37 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['ID'] != null ? int.parse(json['ID'].toString()) : 0,
+      id: json['ID'] != null ? int.tryParse(json['ID'].toString()) ?? 0 : 0,
       dominio: json['Dominio'] != null
-          ? int.parse(json['Dominio'].toString())
+          ? int.tryParse(json['Dominio'].toString()) ?? 0
           : 0,
       login: json['Login']?.toString() ?? '',
       password: json['Password']?.toString() ?? '',
       email: json['Email']?.toString() ?? '',
       maildir: json['Maildir']?.toString() ?? '',
       identificacion: json['Identificacion']?.toString() ?? '',
-      grupo: json['Grupo'],
-      quota: json['Quota'] != null ? int.parse(json['Quota'].toString()) : 0,
+      grupo: json['Grupo']?.toString() ?? '', // ahora seguro si es null
+      quota: json['Quota'] != null
+          ? int.tryParse(json['Quota'].toString()) ?? 0
+          : 0,
     );
   }
+
+  // factory User.fromJson(Map<String, dynamic> json) {
+  //   return User(
+  //     id: json['ID'] != null ? int.parse(json['ID'].toString()) : 0,
+  //     dominio: json['Dominio'] != null
+  //         ? int.parse(json['Dominio'].toString())
+  //         : 0,
+  //     login: json['Login']?.toString() ?? '',
+  //     password: json['Password']?.toString() ?? '',
+  //     email: json['Email']?.toString() ?? '',
+  //     maildir: json['Maildir']?.toString() ?? '',
+  //     identificacion: json['Identificacion']?.toString() ?? '',
+  //     grupo: json['Grupo'],
+  //     quota: json['Quota'] != null ? int.parse(json['Quota'].toString()) : 0,
+  //   );
+  // }
   Map<String, dynamic> toJson() {
     return {
       'id': id,

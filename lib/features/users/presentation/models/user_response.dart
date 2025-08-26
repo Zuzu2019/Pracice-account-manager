@@ -12,11 +12,24 @@ class UserResponse {
     required this.users,
   });
 
+  // factory UserResponse.fromJson(Map<String, dynamic> json) {
+  //   return UserResponse(
+  //     totalCount: json['TotalCount'] ?? 1,
+  //     totalPages: json['TotalPages'] ?? 1,
+  //     users:
+  //         (json['Users'] as List).map((e) => User.fromJson(e)).toList(),
+  //   );
+  // }
+
   factory UserResponse.fromJson(Map<String, dynamic> json) {
     return UserResponse(
-      totalCount: json['TotalCount'],
-      totalPages: json['TotalPages'],
-      users: (json['Users'] as List).map((e) => User.fromJson(e)).toList(),
+      totalCount: json['TotalCount'] ?? 0,
+      totalPages: json['TotalPages'] ?? 1,
+      users:
+          (json['Users'] as List<dynamic>?)
+              ?.map((e) => User.fromJson(e))
+              .toList() ??
+          [], // si es null, lista vacía
     );
   }
 }

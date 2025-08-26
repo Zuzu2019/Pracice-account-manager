@@ -24,13 +24,13 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   final _passCtrl = TextEditingController();
   bool _obscure = true;
 
-  late final WebViewController _controller;
+  //late final WebViewController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted);
+    //_controller = WebViewController()
+    //  ..setJavaScriptMode(JavaScriptMode.unrestricted);
   }
 
   @override
@@ -41,72 +41,72 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   }
 
   /// Genera token reCAPTCHA v3
-  Future<String> getRecaptchaToken() async {
-    final Completer<String> tokenCompleter = Completer<String>();
-    final String siteKey = dotenv.env['SITE_KEY_RECAPTCHA'] ?? '';
+  // Future<String> getRecaptchaToken() async {
+  //   final Completer<String> tokenCompleter = Completer<String>();
+  //   final String siteKey = dotenv.env['SITE_KEY_RECAPTCHA'] ?? '';
 
-    final String html =
-        """
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>reCAPTCHA v3</title>
-      <script src="https://www.google.com/recaptcha/api.js?render=$siteKey"></script>
-      <script>
-        // Captura console.log para debug en Flutter
-        const originalLog = console.log;
-        console.log = function(msg) {
-          ConsoleLog.postMessage(msg);
-          originalLog(msg);
-        };
+  //   final String html =
+  //       """
+  //   <!DOCTYPE html>
+  //   <html lang="en">
+  //   <head>
+  //     <meta charset="UTF-8">
+  //     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  //     <title>reCAPTCHA v3</title>
+  //     <script src="https://www.google.com/recaptcha/api.js?render=$siteKey"></script>
+  //     <script>
+  //       // Captura console.log para debug en Flutter
+  //       const originalLog = console.log;
+  //       console.log = function(msg) {
+  //         ConsoleLog.postMessage(msg);
+  //         originalLog(msg);
+  //       };
 
-        grecaptcha.ready(function() {
-          grecaptcha.execute('$siteKey', {action: 'login'}).then(function(token) {
-            console.log('Token generado: ' + token);
-            Recaptcha.postMessage(token);
-          });
-        });
-      </script>
-    </head>
-    <body></body>
-    </html>
-    """;
+  //       grecaptcha.ready(function() {
+  //         grecaptcha.execute('$siteKey', {action: 'login'}).then(function(token) {
+  //           console.log('Token generado: ' + token);
+  //           Recaptcha.postMessage(token);
+  //         });
+  //       });
+  //     </script>
+  //   </head>
+  //   <body></body>
+  //   </html>
+  //   """;
 
-    _controller.addJavaScriptChannel(
-      'Recaptcha',
-      onMessageReceived: (message) {
-        if (!tokenCompleter.isCompleted) {
-          tokenCompleter.complete(message.message);
-        }
-      },
-    );
+  // _controller.addJavaScriptChannel(
+  //   'Recaptcha',
+  //   onMessageReceived: (message) {
+  //     if (!tokenCompleter.isCompleted) {
+  //       tokenCompleter.complete(message.message);
+  //     }
+  //   },
+  // );
 
-    _controller.addJavaScriptChannel(
-      'ConsoleLog',
-      onMessageReceived: (message) {
-        print('JS log: ${message.message}');
-      },
-    );
+  // _controller.addJavaScriptChannel(
+  //   'ConsoleLog',
+  //   onMessageReceived: (message) {
+  //     print('JS log: ${message.message}');
+  //   },
+  // );
 
-    _controller.loadHtmlString(html);
-    return tokenCompleter.future;
-  }
+  // _controller.loadHtmlString(html);
+  // return tokenCompleter.future;
+  //}
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      final token = await getRecaptchaToken();
-      print("Token recibido en Flutter: $token");
+      // final token = await getRecaptchaToken();
+      // print("Token recibido en Flutter: $token");
 
       final authNotifier = ref.read(authProvider.notifier);
 
       final resp = await login(
         _emailCtrl.text.trim(),
         _passCtrl.text.trim(),
-        token,
+        '',
       );
 
       if (resp.statusCode == 200) {
@@ -186,11 +186,11 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               child: Text(loc.sign_in, style: const TextStyle(fontSize: 16)),
             ),
           ),
-          SizedBox(
-            height: 0,
-            width: 0,
-            child: WebViewWidget(controller: _controller),
-          ),
+          // SizedBox(
+          //   height: 0,
+          //   width: 0,
+          //   child: WebViewWidget(controller: _controller),
+          // ),
         ],
       ),
     );

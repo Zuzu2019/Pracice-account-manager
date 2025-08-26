@@ -86,20 +86,22 @@ class _AddUserFormState extends ConsumerState<UpdateUserForm> {
     //if (isGeneralValid) {
 
     final user = User(
-      dominio: int.tryParse(_selectedDomain ?? '0') ?? 0,
+      dominio: _selectedDomain != null
+          ? int.tryParse(_selectedDomain!) ?? widget.user.dominio
+          : widget.user.dominio,
       id: widget.user.id,
       login: _loginController.text.trim(),
       password: _passwordController.text.trim(),
       email: _emailController.text.trim(),
-      maildir: '',
+      maildir: '/prueba',
       identificacion: _identificacionController.text.trim(),
       grupo: _groupController.text.trim(),
       quota: int.tryParse(_quotaController.text.trim()) ?? 0,
     );
 
-    final (_, errors) = usersFormSchema.validateSync(user.toMap());
+    final errors = validateUser(user, isEditing: true);
 
-    if (errors.isNotEmpty) {
+    if (errors != null && errors.isNotEmpty) {
       // Mostrar primer error
       final firstKey = errors.keys.first;
       final firstMessage = errors[firstKey];
@@ -114,7 +116,15 @@ class _AddUserFormState extends ConsumerState<UpdateUserForm> {
       return;
     }
     try {
-      await ref.read(userProvider.notifier).updateUsers(user, user.id);
+      final resp = await ref
+          .read(userProvider.notifier)
+          .updateUsers(user, user.id);
+      if (resp) {
+        final manager = ref.read(usersPagingProvider);
+        manager.reset();
+        await manager.fetchNextPage();
+      }
+
       _showDialog(
         context: context,
         title: loc.user_updated,

@@ -12,25 +12,40 @@ class UsersService {
   Future<UserResponse> getUsers(
     String? token,
     String? refreshToken, {
-    int page = 2,
+    int page = 1,
     int limit = 10,
+    String? query = '',
   }) async {
-    final response = await http.get(
-      Uri.parse('$apiService/users/$page/$limit'),
-      headers: {
-        'Accept': 'application/json',
-        'X-Client-Type': 'mobile',
-        if (token != null) 'Authorization': 'Bearer $token',
-        if (refreshToken != null) 'X-Refresh-Token': refreshToken,
-      },
-    );
+    final response;
+
+    if (query!.isNotEmpty) {
+      response = await http.get(
+        Uri.parse('$apiService/search/users?query=$query&$page&$limit'),
+        headers: {
+          'Accept': 'application/json',
+          'X-Client-Type': 'mobile',
+          if (token != null) 'Authorization': 'Bearer $token',
+          if (refreshToken != null) 'X-Refresh-Token': refreshToken,
+        },
+      );
+    } else {
+      response = await http.get(
+        Uri.parse('$apiService/users/$page/$limit'),
+        headers: {
+          'Accept': 'application/json',
+          'X-Client-Type': 'mobile',
+          if (token != null) 'Authorization': 'Bearer $token',
+          if (refreshToken != null) 'X-Refresh-Token': refreshToken,
+        },
+      );
+    }
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
 
       return UserResponse.fromJson(jsonResponse);
     } else {
-      throw Exception('Error al obtener alias');
+      throw Exception('Error al obtener users');
     }
   }
 

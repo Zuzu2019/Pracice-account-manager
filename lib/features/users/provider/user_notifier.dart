@@ -99,7 +99,7 @@ class UserNotifier extends StateNotifier<AsyncValue<List<User>>> {
     }
   }
 
-  Future<void> updateUsers(User user, int id) async {
+  Future<bool> updateUsers(User user, int id) async {
     try {
       final response = await _service.updateUser(
         id,
@@ -110,6 +110,7 @@ class UserNotifier extends StateNotifier<AsyncValue<List<User>>> {
 
       if (response.statusCode == 200) {
         await fetchUsers();
+        return true;
       } else {
         final body = response.body;
         throw Exception('Error ${response.statusCode}: $body');
@@ -162,10 +163,10 @@ class UserNotifier extends StateNotifier<AsyncValue<List<User>>> {
     }
   }
 
-  void setSearchQuery(String query) {
-    _searchQuery = query;
-    _applyFilter();
-  }
+  // void setSearchQuery(String query) {
+  //   _searchQuery = query;
+  //   _applyFilter();
+  // }
 
   void _applyFilter() {
     final filtered = _searchQuery.isEmpty
