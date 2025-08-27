@@ -6,6 +6,8 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("🔹 Construyendo LoginPage");
+
     return Scaffold(
       // Color de fondo general
       backgroundColor: Colors.white,
@@ -24,6 +26,7 @@ class LoginPage extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
+            print("🔹 Presionado botón regresar en LoginPage");
             Navigator.of(context).pop();
           },
         ),
@@ -43,7 +46,12 @@ class LoginPage extends StatelessWidget {
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 32),
-              LoginForm(),
+              Builder(
+                builder: (context) {
+                  print("🔹 Cargando LoginForm en LoginPage");
+                  return const LoginForm();
+                },
+              ),
             ],
           ),
         ),

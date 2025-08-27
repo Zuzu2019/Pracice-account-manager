@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://www.google.com/recaptcha/api.js?render=6LdgE64rAAAAABJaFkr4HgA7xRCVWcpr26dP0Ubd"></script>
+  <script>
+    function logMessage(msg) {
+      console.log("🌐 [Recaptcha HTML] " + msg);
+      // También se puede enviar a Flutter si se desea
+      if (window.Recaptcha) {
+        Recaptcha.postMessage("LOG: " + msg);
+      }
+    }
+
+    function executeRecaptcha(action) {
+      logMessage("Ejecutando reCAPTCHA con acción: " + action);
+      grecaptcha.ready(function () {
+        logMessage("reCAPTCHA listo, ejecutando...");
+        grecaptcha.execute('6LdgE64rAAAAABJaFkr4HgA7xRCVWcpr26dP0Ubd', { action: action }).then(function (token) {
+          logMessage("Token obtenido: " + token.substring(0, 10) + "..."); // solo primeros 10 caracteres
+          Recaptcha.postMessage(token); // Envía token a Flutter
+        }).catch(function (err) {
+          logMessage("Error al ejecutar reCAPTCHA: " + err);
+        });
+      });
+    }
+
+    window.onload = function () {
+      logMessage("Página cargada, ejecutando reCAPTCHA...");
+      executeRecaptcha('login');
+    };
+  </script>
+</head>
+
+<body>
+</body>
+
+</html>
