@@ -1,8 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:practice_acount_manager/features/users/data/users_service.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/password.dart';
-import 'package:practice_acount_manager/features/users/presentation/models/user_response.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
+import 'package:practice_acount_manager/features/users/provider/user_provider.dart';
 import 'package:practice_acount_manager/riverpod/auth_provider.dart';
 
 class UserNotifier extends StateNotifier<AsyncValue<List<User>>> {
@@ -11,8 +13,6 @@ class UserNotifier extends StateNotifier<AsyncValue<List<User>>> {
 
   String _searchQuery = '';
   List<User> _allUsers = [];
-  int _currentPage = 1;
-  final int _limit = 10;
   bool _hasMore = true;
   bool _isLoadingMore = false;
 
@@ -24,44 +24,6 @@ class UserNotifier extends StateNotifier<AsyncValue<List<User>>> {
   bool get hasMore => _hasMore;
   bool get isLoadingMore => _isLoadingMore;
 
-  //  Future<void> fetchUsers({bool loadMore = false}) async {
-  //   if (loadMore && state.isLoadingMore) return;
-
-  //   try {
-  //     if (!loadMore) {
-  //       _currentPage = 1;
-  //       state = state.copyWith(
-  //         isLoadingMore: false,
-  //         hasMore: true,
-  //         users: [],
-  //       );
-  //     } else {
-  //       _currentPage++;
-  //       state = state.copyWith(isLoadingMore: true);
-  //     }
-
-  //     final response = await _service.getUsers(
-  //       _auth.accessToken,
-  //       _auth.refreshToken,
-  //       page: _currentPage,
-  //       limit: _limit,
-  //     );
-
-  //     final allUsers = [
-  //       if (loadMore) ...state.users,
-  //       ...response.users,
-  //     ];
-
-  //     state = state.copyWith(
-  //       users: allUsers,
-  //       hasMore: _currentPage < response.totalPages,
-  //       isLoadingMore: false,
-  //     );
-  //   } catch (e) {
-  //     state = state.copyWith(isLoadingMore: false);
-  //     rethrow;
-  //   }
-  // }
   Future<void> fetchUsers() async {
     state = const AsyncValue.loading();
 
@@ -88,7 +50,9 @@ class UserNotifier extends StateNotifier<AsyncValue<List<User>>> {
       );
 
       if (response.statusCode == 200) {
-        await fetchUsers();
+        final manager = _ref.read(usersPagingProvider);
+        manager.reset();
+        await manager.fetchNextPage();
       } else {
         final body = response.body;
         throw Exception('Error ${response.statusCode}: $body');
@@ -109,7 +73,9 @@ class UserNotifier extends StateNotifier<AsyncValue<List<User>>> {
       );
 
       if (response.statusCode == 200) {
-        await fetchUsers();
+        final manager = _ref.read(usersPagingProvider);
+        manager.reset();
+        await manager.fetchNextPage();
         return true;
       } else {
         final body = response.body;
@@ -133,12 +99,18 @@ class UserNotifier extends StateNotifier<AsyncValue<List<User>>> {
         state = state.whenData(
           (users) => users.where((u) => u.id != id).toList(),
         );
+        // return true;
+        final manager = _ref.read(usersPagingProvider);
+        manager.reset();
+        await manager.fetchNextPage();
         return true;
       } else {
-        return false;
+        final body = resp.body;
+        throw Exception('Error ${resp.statusCode}: $body');
       }
-    } catch (_) {
-      return false;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
     }
   }
 
@@ -152,21 +124,20 @@ class UserNotifier extends StateNotifier<AsyncValue<List<User>>> {
       );
 
       if (response.statusCode == 200) {
-        await fetchUsers();
+        final manager = _ref.read(usersPagingProvider);
+        manager.reset();
+        await manager.fetchNextPage();
+        return;
       } else {
         final body = response.body;
         throw Exception('Error ${response.statusCode}: $body');
       }
     } catch (e, st) {
       state = AsyncValue.error(e, st);
-      rethrow;
+      // ignore: use_rethrow_when_possible
+      throw e;
     }
   }
-
-  // void setSearchQuery(String query) {
-  //   _searchQuery = query;
-  //   _applyFilter();
-  // }
 
   void _applyFilter() {
     final filtered = _searchQuery.isEmpty
@@ -182,5 +153,33 @@ class UserNotifier extends StateNotifier<AsyncValue<List<User>>> {
   Future<void> reload() async {
     state = AsyncValue.loading();
     await fetchUsers();
+  }
+
+  Future<User?> fetchUserById(int id) async {
+    try {
+      final response = await _service.getUser(
+        id,
+        _auth.accessToken,
+        _auth.refreshToken,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Si tu API devuelve un objeto usuario directo
+        final user = User.fromJson(data);
+        return user;
+
+        // Si tu API devuelve algo como { "user": {...} }
+        // final user = User.fromJson(data['user']);
+        // return user;
+      } else {
+        final body = response.body;
+        throw Exception('Error ${response.statusCode}: $body');
+      }
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
   }
 }

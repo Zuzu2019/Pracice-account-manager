@@ -136,4 +136,24 @@ class UsersService {
 
     return response;
   }
+
+  Future<http.Response> getUser(
+    int id,
+    String? token,
+    String? refreshToken,
+  ) async {
+    final url = '$apiService/user/$id';
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $token',
+        if (refreshToken != null) 'X-Refresh-Token': refreshToken,
+        'X-Client-Type': 'mobile',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    return response;
+  }
 }

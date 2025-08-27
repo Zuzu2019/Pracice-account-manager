@@ -85,9 +85,9 @@ class _AddUserFormState extends ConsumerState<AddUserForm> {
       quota: int.tryParse(_quotaController.text.trim()) ?? 0,
     );
 
-    final errors = validateUser(userAdd, isEditing: true);
+    final errors = validateUser(userAdd, isEditing: false);
 
-    if (errors!.isNotEmpty) {
+    if (errors != null && errors.isNotEmpty) {
       // Mostrar primer error
       final firstKey = errors.keys.first;
       final firstMessage = errors[firstKey];

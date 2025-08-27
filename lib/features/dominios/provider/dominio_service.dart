@@ -9,7 +9,7 @@ final String apiService = dotenv.env['API_SERVICE'] ?? '';
 
 final dominiosProvider = FutureProvider<List>((ref) async {
   final token = ref.read(authProvider).accessToken;
-  final tokenRefresh = ref.read(authProvider).accessToken;
+  final tokenRefresh = ref.read(authProvider).refreshToken;
   final response = await http.get(
     Uri.parse('$apiService/transports/1/40'),
     headers: {

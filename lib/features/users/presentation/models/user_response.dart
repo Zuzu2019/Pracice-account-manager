@@ -1,5 +1,4 @@
-import 'package:practice_acount_manager/features/users/presentation/models/users.dart'
-    show User;
+import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
 
 class UserResponse {
   final int totalCount;
@@ -11,15 +10,6 @@ class UserResponse {
     required this.totalPages,
     required this.users,
   });
-
-  // factory UserResponse.fromJson(Map<String, dynamic> json) {
-  //   return UserResponse(
-  //     totalCount: json['TotalCount'] ?? 1,
-  //     totalPages: json['TotalPages'] ?? 1,
-  //     users:
-  //         (json['Users'] as List).map((e) => User.fromJson(e)).toList(),
-  //   );
-  // }
 
   factory UserResponse.fromJson(Map<String, dynamic> json) {
     return UserResponse(

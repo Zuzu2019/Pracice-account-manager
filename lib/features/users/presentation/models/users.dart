@@ -23,38 +23,23 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    final normalized = {
+      for (var entry in json.entries) entry.key.toLowerCase(): entry.value,
+    };
+
     return User(
-      id: json['ID'] != null ? int.tryParse(json['ID'].toString()) ?? 0 : 0,
-      dominio: json['Dominio'] != null
-          ? int.tryParse(json['Dominio'].toString()) ?? 0
-          : 0,
-      login: json['Login']?.toString() ?? '',
-      password: json['Password']?.toString() ?? '',
-      email: json['Email']?.toString() ?? '',
-      maildir: json['Maildir']?.toString() ?? '',
-      identificacion: json['Identificacion']?.toString() ?? '',
-      grupo: json['Grupo']?.toString() ?? '', // ahora seguro si es null
-      quota: json['Quota'] != null
-          ? int.tryParse(json['Quota'].toString()) ?? 0
-          : 0,
+      id: int.tryParse(normalized['id']?.toString() ?? '') ?? 0,
+      dominio: int.tryParse(normalized['dominio']?.toString() ?? '') ?? 0,
+      login: normalized['login']?.toString() ?? '',
+      password: normalized['password']?.toString() ?? '',
+      email: normalized['email']?.toString() ?? '',
+      maildir: normalized['maildir']?.toString() ?? '',
+      identificacion: normalized['identificacion']?.toString() ?? '',
+      grupo: normalized['grupo']?.toString() ?? '',
+      quota: int.tryParse(normalized['quota']?.toString() ?? '') ?? 0,
     );
   }
 
-  // factory User.fromJson(Map<String, dynamic> json) {
-  //   return User(
-  //     id: json['ID'] != null ? int.parse(json['ID'].toString()) : 0,
-  //     dominio: json['Dominio'] != null
-  //         ? int.parse(json['Dominio'].toString())
-  //         : 0,
-  //     login: json['Login']?.toString() ?? '',
-  //     password: json['Password']?.toString() ?? '',
-  //     email: json['Email']?.toString() ?? '',
-  //     maildir: json['Maildir']?.toString() ?? '',
-  //     identificacion: json['Identificacion']?.toString() ?? '',
-  //     grupo: json['Grupo'],
-  //     quota: json['Quota'] != null ? int.parse(json['Quota'].toString()) : 0,
-  //   );
-  // }
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -80,5 +65,31 @@ class User {
       "dominio": dominio,
       "quota": quota,
     };
+  }
+}
+
+extension UserCopyWith on User {
+  User copyWith({
+    int? id,
+    int? dominio,
+    String? login,
+    String? password,
+    String? email,
+    String? maildir,
+    String? identificacion,
+    String? grupo,
+    int? quota,
+  }) {
+    return User(
+      id: id ?? this.id,
+      dominio: dominio ?? this.dominio,
+      login: login ?? this.login,
+      password: password ?? this.password,
+      email: email ?? this.email,
+      maildir: maildir ?? this.maildir,
+      identificacion: identificacion ?? this.identificacion,
+      grupo: grupo ?? this.grupo,
+      quota: quota ?? this.quota,
+    );
   }
 }

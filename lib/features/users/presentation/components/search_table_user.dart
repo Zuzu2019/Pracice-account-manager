@@ -42,11 +42,11 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
         final success = await ref
             .read(userProvider.notifier)
             .deleteUser(user.id);
-        if (success) {
-          final manager = ref.read(usersPagingProvider);
-          manager.reset();
-          await manager.fetchNextPage();
-        }
+        // if (success) {
+        //   final manager = ref.read(usersPagingProvider);
+        //   manager.reset();
+        //   await manager.fetchNextPage();
+        // }
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

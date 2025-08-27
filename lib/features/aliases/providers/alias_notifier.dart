@@ -22,7 +22,7 @@ class AliasNotifier extends StateNotifier<AsyncValue<List<Aliases>>> {
         _auth.accessToken,
         _auth.refreshToken,
       );
-      _allAlias = aliases;
+      _allAlias = aliases.alias;
       _applyFilter();
     } catch (e, st) {
       state = AsyncValue.error(e, st);

@@ -1,30 +1,31 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:practice_acount_manager/features/users/data/users_service.dart';
-import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
+import 'package:practice_acount_manager/features/aliases/data/alias_service.dart';
+import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 
-class UsersPagingManager extends ChangeNotifier {
+class AliasPagingManager extends ChangeNotifier {
   static const _pageSize = 10;
 
-  final UsersService _service;
+  final AliasService _service;
   final String? accessToken;
   final String? refreshToken;
 
-  PagingState<int, User> state = PagingState(
+  String _currentQuery = '';
+  Timer? _debounce;
+
+  PagingState<int, Aliases> state = PagingState(
     pages: [],
     keys: [],
     isLoading: false,
     hasNextPage: true,
   );
 
-  String _currentQuery = '';
-  Timer? _debounce;
-
-  UsersPagingManager({
-    required UsersService service,
-    this.accessToken,
-    this.refreshToken,
+  AliasPagingManager({
+    required AliasService service,
+    required this.accessToken,
+    required this.refreshToken,
   }) : _service = service;
 
   void setSearchQuery(String query) {
@@ -32,23 +33,21 @@ class UsersPagingManager extends ChangeNotifier {
 
     _debounce = Timer(const Duration(milliseconds: 500), () {
       _currentQuery = query;
-      reset(); // Reinicia la paginación con la nueva query
+      reset();
     });
   }
 
-  /// 🔄 Reinicia la paginación
-  Future<void> reset() async {
+  void reset() async {
     state = PagingState(
       pages: [],
       keys: [],
       isLoading: false,
       hasNextPage: true,
     );
-    notifyListeners(); // notificar que se limpió la lista
-    await fetchNextPage(); // carga inicial con la query actual
+    notifyListeners();
+    await fetchNextPage();
   }
 
-  /// 📄 Carga la siguiente página
   Future<void> fetchNextPage() async {
     if (state.isLoading || !state.hasNextPage) return;
 
@@ -58,28 +57,28 @@ class UsersPagingManager extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _service.getUsers(
+      final response = await _service.getAlias(
         accessToken,
         refreshToken,
         page: currentPage,
         limit: _pageSize,
-        query: _currentQuery, // <--- tu query aquí
+        query: _currentQuery,
       );
 
-      final users = response.users ?? [];
+      final alias = response.alias ?? [];
       final isLastPage = currentPage >= response.totalPages;
 
       if (isLastPage) {
         state = state.copyWith(
-          pages: [...?state.pages, users],
+          pages: [...?state.pages, alias],
           keys: [...?state.keys, currentPage],
           hasNextPage: false,
           isLoading: false,
         );
       } else {
         state = state.copyWith(
-          pages: [...?state.pages, users],
-          keys: [...?state.keys, currentPage + 1],
+          pages: [...?state.pages, alias],
+          keys: [...?state.keys, currentPage],
           hasNextPage: true,
           isLoading: false,
         );
@@ -92,7 +91,6 @@ class UsersPagingManager extends ChangeNotifier {
     }
   }
 
-  @override
   void dispose() {
     _debounce?.cancel();
     super.dispose();
