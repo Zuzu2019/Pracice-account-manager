@@ -6,12 +6,23 @@ class Aliases {
   Aliases({required this.id, required this.local, required this.remoto});
 
   factory Aliases.fromJson(Map<String, dynamic> json) {
+    final normalized = {
+      for (var entry in json.entries) entry.key.toLowerCase(): entry.value,
+    };
+
     return Aliases(
-      id: json['ID'] != null ? int.parse(json['ID'].toString()) : 0,
-      local: json['Local']?.toString() ?? '',
-      remoto: json['Remoto']?.toString() ?? '',
+      id: int.tryParse(normalized['id']?.toString() ?? '') ?? 0,
+      local: normalized['local']?.toString() ?? '',
+      remoto: normalized['remoto']?.toString() ?? '',
     );
   }
+  // factory Aliases.fromJson(Map<String, dynamic> json) {
+  //   return Aliases(
+  //     id: json['ID'] != null ? int.parse(json['ID'].toString()) : 0,
+  //     local: json['Local']?.toString() ?? '',
+  //     remoto: json['Remoto']?.toString() ?? '',
+  //   );
+  // }
 
   Map<String, dynamic> toJson() {
     return {'local': local, 'remoto': remoto, 'id': id};

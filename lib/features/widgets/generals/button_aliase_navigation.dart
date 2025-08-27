@@ -4,6 +4,7 @@ import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/frm_add_aliase.dart';
 import 'package:practice_acount_manager/features/aliases/providers/alias_provider.dart';
+import 'package:practice_acount_manager/features/users/provider/user_provider.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 enum ButtonAction { addAliase, listAliase }
@@ -63,12 +64,16 @@ class _ButtonOptionsAliaseState extends ConsumerState<ButtonOptionsAliase> {
               ),
             ),
             ElevatedButton.icon(
-              onPressed: () {
+              onPressed: () async {
                 setState(() {
                   _selectedAction = ButtonAction.listAliase;
                 });
 
-                ref.read(aliasProvider.notifier).reload();
+                final manager = ref.read(usersPagingProvider);
+                manager.reset();
+                await manager.fetchNextPage();
+
+                //ref.read(aliasProvider.notifier).reload();
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => AliasPage()),

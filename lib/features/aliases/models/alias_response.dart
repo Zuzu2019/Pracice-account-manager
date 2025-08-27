@@ -12,14 +12,18 @@ class AliasResponse {
   });
 
   factory AliasResponse.fromJson(Map<String, dynamic> json) {
+    final alias =
+        (json['Alias'] as List<dynamic>?)
+            ?.map((e) => Aliases.fromJson(e))
+            .toList() ??
+        (json['Items'] as List<dynamic>?)
+            ?.map((e) => Aliases.fromJson(e))
+            .toList() ??
+        [];
     return AliasResponse(
       totalCount: json['TotalCount'] ?? 0,
       totalPages: json['TotalPages'] ?? 1,
-      alias:
-          (json['Alias'] as List<dynamic>?)
-              ?.map((e) => Aliases.fromJson(e))
-              .toList() ??
-          [], // si es null, lista vacía
+      alias: alias, // si es null, lista vacía
     );
   }
 }

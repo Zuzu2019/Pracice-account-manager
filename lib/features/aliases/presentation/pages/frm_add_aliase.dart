@@ -67,6 +67,7 @@ class _AddAliasFormState extends ConsumerState<AddAliasForm> {
             title: loc.error_title,
             desc: e.toString(),
             btnOkOnPress: () {},
+            btnOkColor: Colors.red,
           ).show();
         }
       } else {
@@ -93,6 +94,7 @@ class _AddAliasFormState extends ConsumerState<AddAliasForm> {
             title: loc.error_title,
             desc: e.toString(),
             btnOkOnPress: () {},
+            btnOkColor: Colors.red,
           ).show();
         }
       }

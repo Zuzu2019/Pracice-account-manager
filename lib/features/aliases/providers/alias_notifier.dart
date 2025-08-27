@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:practice_acount_manager/features/aliases/data/alias_service.dart';
 import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
+import 'package:practice_acount_manager/features/aliases/providers/alias_provider.dart';
 import 'package:practice_acount_manager/riverpod/auth_provider.dart';
 
 class AliasNotifier extends StateNotifier<AsyncValue<List<Aliases>>> {
@@ -38,7 +39,9 @@ class AliasNotifier extends StateNotifier<AsyncValue<List<Aliases>>> {
       );
 
       if (response.statusCode == 200) {
-        await fetchAlias();
+        final manager = _ref.read(aliasPagingProvider);
+        manager.reset();
+        await manager.fetchNextPage();
       } else {
         final body = response.body;
         throw Exception('Error ${response.statusCode}: $body');
@@ -58,7 +61,9 @@ class AliasNotifier extends StateNotifier<AsyncValue<List<Aliases>>> {
         _auth.refreshToken,
       );
       if (response.statusCode == 200) {
-        await fetchAlias();
+        final manager = _ref.read(aliasPagingProvider);
+        manager.reset();
+        await manager.fetchNextPage();
       } else {
         final body = response.body;
         throw Exception('Error ${response.statusCode}: $body');
@@ -78,15 +83,17 @@ class AliasNotifier extends StateNotifier<AsyncValue<List<Aliases>>> {
       );
 
       if (resp.statusCode == 200) {
-        state = state.whenData(
-          (alias) => alias.where((u) => u.id != id).toList(),
-        );
+        final manager = _ref.read(aliasPagingProvider);
+        manager.reset();
+        await manager.fetchNextPage();
         return true;
       } else {
-        return false;
+        final body = resp.body;
+        throw Exception('Error ${resp.statusCode}: $body');
       }
-    } catch (_) {
-      return false;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
     }
   }
 

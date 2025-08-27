@@ -12,14 +12,19 @@ class UserResponse {
   });
 
   factory UserResponse.fromJson(Map<String, dynamic> json) {
+    final users =
+        (json['Users'] as List<dynamic>?)
+            ?.map((e) => User.fromJson(e))
+            .toList() ??
+        (json['Items'] as List<dynamic>?)
+            ?.map((e) => User.fromJson(e))
+            .toList() ??
+        [];
+
     return UserResponse(
       totalCount: json['TotalCount'] ?? 0,
       totalPages: json['TotalPages'] ?? 1,
-      users:
-          (json['Users'] as List<dynamic>?)
-              ?.map((e) => User.fromJson(e))
-              .toList() ??
-          [], // si es null, lista vacía
+      users: users, // si es null, lista vacía
     );
   }
 }

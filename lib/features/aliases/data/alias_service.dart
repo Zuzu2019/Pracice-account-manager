@@ -28,7 +28,7 @@ class AliasService {
       );
     } else {
       response = await http.get(
-        Uri.parse('$apiService/alias/$page/$limit'),
+        Uri.parse('$apiService/aliases/$page/$limit'),
         headers: {
           'Accept': 'application/json',
           'X-Client-Type': 'mobile',

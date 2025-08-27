@@ -5,10 +5,9 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/frm_add_aliase.dart';
+import 'package:practice_acount_manager/features/aliases/providers/alias_paging_provider.dart';
 import 'package:practice_acount_manager/features/aliases/providers/alias_provider.dart';
 import 'package:practice_acount_manager/features/core/navigation.dart';
-import 'package:practice_acount_manager/features/users/provider/user_paging_provider.dart';
-import 'package:practice_acount_manager/features/users/provider/user_provider.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
@@ -74,8 +73,7 @@ class _SearchTableAliasesState extends ConsumerState<SearchTableAliases> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    final aliasAsync = ref.watch(aliasProvider); //Consumimos aliasProvider
-    final manager = ref.watch<UsersPagingManager>(usersPagingProvider);
+    final manager = ref.watch<AliasPagingManager>(aliasPagingProvider);
 
     return Column(
       children: [
@@ -83,16 +81,80 @@ class _SearchTableAliasesState extends ConsumerState<SearchTableAliases> {
           padding: const EdgeInsets.all(8),
           child: SearchBarExample(
             onQueryChanged: (query) {
-              ref.read(aliasProvider.notifier).setSearchQuery(query);
+              ref.read(aliasPagingProvider.notifier).setSearchQuery(query);
             },
           ),
         ),
         const SizedBox(height: 16),
         Expanded(
-          child: PagedListView(
-            state: state,
-            fetchNextPage: fetchNextPage,
-            builderDelegate: builderDelegate,
+          child: PagedListView<int, Aliases>(
+            state: manager.state,
+            fetchNextPage: () => manager.fetchNextPage(),
+            builderDelegate: PagedChildBuilderDelegate<Aliases>(
+              itemBuilder: (context, alias, index) => Card(
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(16),
+                  leading: const Icon(Icons.person, color: Colors.blue),
+                  title: Text(
+                    '${loc.local_label}: ${alias.local}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  subtitle: Text(
+                    '${loc.remote_label}: ${alias.remoto}',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) async {
+                      if (value == 'edit') {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                AddAliasForm(alias: alias, isEditing: true),
+                          ),
+                        );
+                      } else if (value == 'delete') {
+                        _onDelete(alias);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.edit, color: Colors.blue),
+                            const SizedBox(width: 8),
+                            Text(loc.edit),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.delete, color: Colors.red),
+                            const SizedBox(width: 8),
+                            Text(loc.delete),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              firstPageProgressIndicatorBuilder: (_) =>
+                  const Center(child: CircularProgressIndicator()),
+              newPageProgressIndicatorBuilder: (_) =>
+                  const Center(child: CircularProgressIndicator()),
+              transitionDuration: Duration(seconds: 6),
+              noItemsFoundIndicatorBuilder: (_) =>
+                  const Center(child: CircularProgressIndicator()),
+            ),
           ),
         ),
       ],
