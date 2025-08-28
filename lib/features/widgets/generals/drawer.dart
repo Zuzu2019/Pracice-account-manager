@@ -3,6 +3,7 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/auth/presentation/pages/select_login_page.dart';
+import 'package:practice_acount_manager/features/auth/presentation/service/auth_service.dart';
 import 'package:practice_acount_manager/features/auth/presentation/service/auth_service_local.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
 import 'package:practice_acount_manager/features/widgets/generals/home.dart';
@@ -134,7 +135,7 @@ class AppDrawer extends ConsumerWidget {
                   btnOkText: 'Confirmar',
                   btnOkOnPress: () async {
                     Navigator.of(context).pop();
-                    await logoutLocal();
+                    await logout(context);
 
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
@@ -160,6 +161,7 @@ class AppDrawer extends ConsumerWidget {
               ),
               onTap: () {
                 showDialog(
+                  barrierDismissible: false,
                   context: context,
                   builder: (_) => AlertDialog(
                     title: Text(loc.select_language),

@@ -16,7 +16,8 @@ class UsersService {
     int limit = 10,
     String? query = '',
   }) async {
-    final response;
+    await Future.delayed(const Duration(seconds: 2));
+    final http.Response response;
 
     if (query!.isNotEmpty) {
       response = await http.get(
@@ -53,6 +54,7 @@ class UsersService {
     User user,
     String? token,
     String? refreshToken,
+    String? tokenRecaptcha,
   ) async {
     final response = await http.post(
       Uri.parse('$apiService/register'),
@@ -60,7 +62,7 @@ class UsersService {
         'Authorization': 'Bearer $token',
         if (refreshToken != null) 'X-Refresh-Token': refreshToken,
         'X-Client-Type': 'mobile',
-        'X-Recaptcha-Site': dotenv.env['SITE_KEY_RECAPTCHA'] ?? '',
+        if (tokenRecaptcha != null) 'X-Recaptcha-Site': tokenRecaptcha,
         'Content-Type': 'application/json',
       },
       body: jsonEncode(user.toJson()),
@@ -75,6 +77,7 @@ class UsersService {
     String? token,
     String? refreshToken,
   ) async {
+    await Future.delayed(const Duration(seconds: 3));
     final url = '$apiService/user/$id';
 
     final response = await http.put(

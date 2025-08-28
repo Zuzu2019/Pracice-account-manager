@@ -30,6 +30,7 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
     AwesomeDialog(
       context: context,
       dialogType: DialogType.question,
+      dismissOnTouchOutside: false,
       animType: AnimType.bottomSlide,
       title: loc.delete,
       desc:
@@ -42,11 +43,6 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
         final success = await ref
             .read(userProvider.notifier)
             .deleteUser(user.id);
-        // if (success) {
-        //   final manager = ref.read(usersPagingProvider);
-        //   manager.reset();
-        //   await manager.fetchNextPage();
-        // }
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -244,6 +240,7 @@ class _SearchTableUserState extends ConsumerState<SearchTableUser> {
                   const Center(child: CircularProgressIndicator()),
               noItemsFoundIndicatorBuilder: (_) =>
                   const Center(child: CircularProgressIndicator()),
+              //const Center(child: Text('No se encontraron datos')),
             ),
           ),
         ),

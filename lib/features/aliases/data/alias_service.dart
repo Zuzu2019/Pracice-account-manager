@@ -14,6 +14,8 @@ class AliasService {
     int limit = 10,
     String? query = '',
   }) async {
+    await Future.delayed(const Duration(seconds: 1));
+
     final response;
 
     if (query!.isNotEmpty) {
@@ -52,6 +54,7 @@ class AliasService {
     String? token,
     String? refreshToken,
   ) async {
+    await Future.delayed(const Duration(seconds: 3));
     final response = await http.post(
       Uri.parse('$apiService/alias'),
       headers: {
@@ -72,6 +75,7 @@ class AliasService {
     String? token,
     String? refreshToken,
   ) async {
+    await Future.delayed(const Duration(seconds: 3));
     final url = '$apiService/alias/$id';
 
     final response = await http.put(

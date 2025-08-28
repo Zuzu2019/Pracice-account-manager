@@ -40,13 +40,14 @@ class UserNotifier extends StateNotifier<AsyncValue<List<User>>> {
     }
   }
 
-  Future<void> addUsers(User user) async {
+  Future<void> addUsers(User user, tokenR) async {
     state = const AsyncValue.loading();
     try {
       final response = await _service.saveUser(
         user,
         _auth.accessToken,
         _auth.refreshToken,
+        tokenR,
       );
 
       if (response.statusCode == 200) {

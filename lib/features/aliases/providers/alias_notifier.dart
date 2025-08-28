@@ -11,7 +11,7 @@ class AliasNotifier extends StateNotifier<AsyncValue<List<Aliases>>> {
   String _searchQuery = '';
   List<Aliases> _allAlias = [];
 
-  AliasNotifier(this._service, this._ref) : super(AsyncValue.loading()) {
+  AliasNotifier(this._service, this._ref) : super(AsyncValue.data([])) {
     fetchAlias();
   }
 
@@ -32,6 +32,8 @@ class AliasNotifier extends StateNotifier<AsyncValue<List<Aliases>>> {
 
   Future<void> addAlias(Aliases alias) async {
     try {
+      state = const AsyncValue.loading();
+
       final response = await _service.saveAlias(
         alias,
         _auth.accessToken,

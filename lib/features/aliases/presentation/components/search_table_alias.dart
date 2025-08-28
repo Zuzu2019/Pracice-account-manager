@@ -10,6 +10,7 @@ import 'package:practice_acount_manager/features/aliases/providers/alias_provide
 import 'package:practice_acount_manager/features/core/navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class SearchTableAliases extends ConsumerStatefulWidget {
   const SearchTableAliases({super.key});
@@ -20,6 +21,7 @@ class SearchTableAliases extends ConsumerStatefulWidget {
 
 class _SearchTableAliasesState extends ConsumerState<SearchTableAliases> {
   final TextEditingController _searchCtrl = TextEditingController();
+  final _isLoading = StateProvider<bool>((ref) => false);
 
   @override
   void initState() {
@@ -37,15 +39,19 @@ class _SearchTableAliasesState extends ConsumerState<SearchTableAliases> {
   void _onDelete(Aliases alias) {
     final BuildContext? scaffoldContext = navigatorKey.currentContext;
     final loc = AppLocalizations.of(scaffoldContext!)!;
+    ref.read(_isLoading.notifier).state = true;
 
     AwesomeDialog(
       context: context,
       dialogType: DialogType.question,
+      dismissOnTouchOutside: false,
       animType: AnimType.bottomSlide,
       title: loc.delete,
       desc: '${alias.local} ${loc.delete_confirmation}?',
       btnCancelText: loc.cancel,
-      btnCancelOnPress: () {},
+      btnCancelOnPress: () {
+        ref.read(_isLoading.notifier).state = false;
+      },
       btnOkText: loc.confirm,
       btnOkOnPress: () async {
         try {
@@ -65,6 +71,8 @@ class _SearchTableAliasesState extends ConsumerState<SearchTableAliases> {
           ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
             SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
           );
+        } finally {
+          ref.read(_isLoading.notifier).state = false;
         }
       },
     ).show();
@@ -74,176 +82,138 @@ class _SearchTableAliasesState extends ConsumerState<SearchTableAliases> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     final manager = ref.watch<AliasPagingManager>(aliasPagingProvider);
-
-    return Column(
+    final isLoading = ref.watch(_isLoading);
+    return Stack(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: SearchBarExample(
-            onQueryChanged: (query) {
-              ref.read(aliasPagingProvider.notifier).setSearchQuery(query);
-            },
-          ),
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: PagedListView<int, Aliases>(
-            state: manager.state,
-            fetchNextPage: () => manager.fetchNextPage(),
-            builderDelegate: PagedChildBuilderDelegate<Aliases>(
-              itemBuilder: (context, alias, index) => Card(
-                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+        Scaffold(
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: SearchBarExample(
+                  onQueryChanged: (query) {
+                    ref
+                        .read(aliasPagingProvider.notifier)
+                        .setSearchQuery(query);
+                  },
                 ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(16),
-                  leading: const Icon(Icons.person, color: Colors.blue),
-                  title: Text(
-                    '${loc.local_label}: ${alias.local}',
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                  subtitle: Text(
-                    '${loc.remote_label}: ${alias.remoto}',
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (value) async {
-                      if (value == 'edit') {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                AddAliasForm(alias: alias, isEditing: true),
-                          ),
-                        );
-                      } else if (value == 'delete') {
-                        _onDelete(alias);
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.edit, color: Colors.blue),
-                            const SizedBox(width: 8),
-                            Text(loc.edit),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: PagedListView<int, Aliases>(
+                  state: manager.state,
+                  fetchNextPage: () => manager.fetchNextPage(),
+                  builderDelegate: PagedChildBuilderDelegate<Aliases>(
+                    itemBuilder: (context, alias, index) => Card(
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 4,
+                      ),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(16),
+                        leading: const Icon(Icons.person, color: Colors.blue),
+                        title: Text(
+                          '${loc.local_label}: ${alias.local}',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        subtitle: Text(
+                          '${loc.remote_label}: ${alias.remoto}',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        trailing: PopupMenuButton<String>(
+                          onSelected: (value) async {
+                            if (value == 'edit') {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AddAliasForm(
+                                    alias: alias,
+                                    isEditing: true,
+                                  ),
+                                ),
+                              );
+                            } else if (value == 'delete') {
+                              _onDelete(alias);
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.edit, color: Colors.blue),
+                                  const SizedBox(width: 8),
+                                  Text(loc.edit),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.delete, color: Colors.red),
+                                  const SizedBox(width: 8),
+                                  Text(loc.delete),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.delete, color: Colors.red),
-                            const SizedBox(width: 8),
-                            Text(loc.delete),
-                          ],
-                        ),
-                      ),
-                    ],
+                    ),
+                    firstPageProgressIndicatorBuilder: (_) =>
+                        // Skeletonizer(
+                        //   enabled: true,
+                        //   child: ListView.builder(
+                        //     itemCount: 5, // cantidad de esqueletos a mostrar
+                        //     itemBuilder: (context, index) => Card(
+                        //       margin: const EdgeInsets.symmetric(
+                        //         vertical: 8,
+                        //         horizontal: 4,
+                        //       ),
+                        //       elevation: 4,
+                        //       shape: RoundedRectangleBorder(
+                        //         borderRadius: BorderRadius.circular(15),
+                        //       ),
+                        //       child: const ListTile(
+                        //         contentPadding: EdgeInsets.all(16),
+                        //         leading: Icon(Icons.person),
+                        //         title: Text("Local alias"),
+                        //         subtitle: Text("Remote alias"),
+                        //         trailing: Icon(Icons.more_vert),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+                        const Center(child: CircularProgressIndicator()),
+                    newPageProgressIndicatorBuilder: (_) =>
+                        const Center(child: CircularProgressIndicator()),
+                    noItemsFoundIndicatorBuilder: (_) =>
+                        const Center(child: CircularProgressIndicator()),
                   ),
                 ),
               ),
-              firstPageProgressIndicatorBuilder: (_) =>
-                  const Center(child: CircularProgressIndicator()),
-              newPageProgressIndicatorBuilder: (_) =>
-                  const Center(child: CircularProgressIndicator()),
-              transitionDuration: Duration(seconds: 6),
-              noItemsFoundIndicatorBuilder: (_) =>
-                  const Center(child: CircularProgressIndicator()),
-            ),
+            ],
           ),
         ),
+        if (isLoading)
+          IgnorePointer(
+            ignoring: true, // deja pasar el scroll aunque muestre el overlay
+            child: Container(
+              color: Colors.black45,
+              child: const Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
       ],
     );
-
-    // return aliasAsync.when(
-    //   data: (aliases) {
-    //     return SingleChildScrollView(
-    //       padding: EdgeInsets.all(15),
-    //       child: Column(
-    //         children: [
-    //           SearchBarExample(
-    //             onQueryChanged: (query) {
-    //               ref.read(aliasProvider.notifier).setSearchQuery(query);
-    //             },
-    //           ),
-    //           const SizedBox(height: 16),
-    //           ListView.builder(
-    //             shrinkWrap: true,
-    //             physics: NeverScrollableScrollPhysics(),
-    //             itemCount: aliases.length,
-    //             itemBuilder: (context, index) {
-    //               final alias = aliases[index];
-    //               return Card(
-    //                 margin: const EdgeInsets.symmetric(
-    //                   vertical: 8,
-    //                   horizontal: 1,
-    //                 ),
-    //                 elevation: 4,
-    //                 shape: RoundedRectangleBorder(
-    //                   borderRadius: BorderRadius.circular(12),
-    //                 ),
-    //                 child: ListTile(
-    //                   leading: const Icon(Icons.person, color: Colors.blue),
-    //                   title: Text(
-    //                     '${loc.local_label}: ${alias.local}',
-    //                     style: const TextStyle(fontSize: 13),
-    //                   ),
-    //                   subtitle: Text(
-    //                     '${loc.remote_label}: ${alias.remoto}',
-    //                     style: TextStyle(fontSize: 13),
-    //                   ),
-    //                   trailing: PopupMenuButton<String>(
-    //                     onSelected: (value) async {
-    //                       if (value == 'edit') {
-    //                         await Navigator.push(
-    //                           context,
-    //                           MaterialPageRoute(
-    //                             builder: (context) =>
-    //                                 AddAliasForm(alias: alias, isEditing: true),
-    //                           ),
-    //                         );
-    //                       } else if (value == 'delete') {
-    //                         _onDelete(alias);
-    //                       }
-    //                     },
-    //                     itemBuilder: (context) => [
-    //                       PopupMenuItem(
-    //                         value: 'edit',
-    //                         child: Row(
-    //                           children: [
-    //                             Icon(Icons.edit, color: Colors.blue),
-    //                             SizedBox(width: 8),
-    //                             Text(loc.edit),
-    //                           ],
-    //                         ),
-    //                       ),
-    //                       PopupMenuItem(
-    //                         value: 'delete',
-    //                         child: Row(
-    //                           children: [
-    //                             Icon(Icons.delete, color: Colors.red),
-    //                             SizedBox(width: 8),
-    //                             Text(loc.delete),
-    //                           ],
-    //                         ),
-    //                       ),
-    //                     ],
-    //                   ),
-    //                 ),
-    //               );
-    //             },
-    //           ),
-    //         ],
-    //       ),
-    //  );
-    //   },
-    //   loading: () => const Center(child: CircularProgressIndicator()),
-    //   error: (error, _) => Center(child: Text('Error: $error')),
-    // );
   }
 }

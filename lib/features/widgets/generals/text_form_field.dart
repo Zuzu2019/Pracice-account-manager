@@ -29,7 +29,7 @@ class CustomTextFormField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(
-          color: Color.fromARGB(255, 25, 0, 255),
+          color: Color.fromARGB(255, 26, 54, 216),
           fontWeight: FontWeight.bold,
         ),
         hintText: hint,
