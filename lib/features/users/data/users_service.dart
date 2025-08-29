@@ -16,7 +16,7 @@ class UsersService {
     int limit = 10,
     String? query = '',
   }) async {
-    await Future.delayed(const Duration(seconds: 2));
+    //await Future.delayed(const Duration(seconds: 2));
     final http.Response response;
 
     if (query!.isNotEmpty) {

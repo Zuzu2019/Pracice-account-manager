@@ -10,7 +10,6 @@ import 'package:practice_acount_manager/features/aliases/providers/alias_provide
 import 'package:practice_acount_manager/features/core/navigation.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 class SearchTableAliases extends ConsumerStatefulWidget {
   const SearchTableAliases({super.key});
@@ -166,29 +165,6 @@ class _SearchTableAliasesState extends ConsumerState<SearchTableAliases> {
                       ),
                     ),
                     firstPageProgressIndicatorBuilder: (_) =>
-                        // Skeletonizer(
-                        //   enabled: true,
-                        //   child: ListView.builder(
-                        //     itemCount: 5, // cantidad de esqueletos a mostrar
-                        //     itemBuilder: (context, index) => Card(
-                        //       margin: const EdgeInsets.symmetric(
-                        //         vertical: 8,
-                        //         horizontal: 4,
-                        //       ),
-                        //       elevation: 4,
-                        //       shape: RoundedRectangleBorder(
-                        //         borderRadius: BorderRadius.circular(15),
-                        //       ),
-                        //       child: const ListTile(
-                        //         contentPadding: EdgeInsets.all(16),
-                        //         leading: Icon(Icons.person),
-                        //         title: Text("Local alias"),
-                        //         subtitle: Text("Remote alias"),
-                        //         trailing: Icon(Icons.more_vert),
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
                         const Center(child: CircularProgressIndicator()),
                     newPageProgressIndicatorBuilder: (_) =>
                         const Center(child: CircularProgressIndicator()),
@@ -202,7 +178,7 @@ class _SearchTableAliasesState extends ConsumerState<SearchTableAliases> {
         ),
         if (isLoading)
           IgnorePointer(
-            ignoring: true, // deja pasar el scroll aunque muestre el overlay
+            ignoring: true,
             child: Container(
               color: Colors.black45,
               child: const Center(

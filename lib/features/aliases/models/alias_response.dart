@@ -23,7 +23,7 @@ class AliasResponse {
     return AliasResponse(
       totalCount: json['TotalCount'] ?? 0,
       totalPages: json['TotalPages'] ?? 1,
-      alias: alias, // si es null, lista vacía
+      alias: alias,
     );
   }
 }

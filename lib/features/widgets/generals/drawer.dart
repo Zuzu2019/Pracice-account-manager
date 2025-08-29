@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
-import 'package:practice_acount_manager/features/auth/presentation/pages/select_login_page.dart';
 import 'package:practice_acount_manager/features/auth/presentation/service/auth_service.dart';
-import 'package:practice_acount_manager/features/auth/presentation/service/auth_service_local.dart';
+import 'package:practice_acount_manager/features/perfil/presentation/pages/informacion_perfil.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
 import 'package:practice_acount_manager/features/widgets/generals/home.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
-import 'package:practice_acount_manager/riverpod/statenotifier.dart'; // para logout
+import 'package:practice_acount_manager/riverpod/auth_provider.dart';
+import 'package:practice_acount_manager/riverpod/statenotifier.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -16,6 +17,7 @@ class AppDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loc = AppLocalizations.of(context)!;
+    final userInfo = ref.read(authProvider);
 
     return SizedBox(
       width: 230,
@@ -44,7 +46,7 @@ class AppDrawer extends ConsumerWidget {
               child: Align(
                 alignment: Alignment.bottomLeft,
                 child: Text(
-                  loc.menu,
+                  userInfo.userInfo?['preferred_username'],
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 30,
@@ -59,6 +61,26 @@ class AppDrawer extends ConsumerWidget {
                   ),
                 ),
               ),
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.supervised_user_circle_outlined,
+                color: Colors.indigo,
+              ),
+              title: Text(
+                'Perfil',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const InformacionPerfil()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.home, color: Colors.indigo),
@@ -135,17 +157,8 @@ class AppDrawer extends ConsumerWidget {
                   btnOkText: 'Confirmar',
                   btnOkOnPress: () async {
                     Navigator.of(context).pop();
-                    await logout(context);
 
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (_) => const SelectLoginPage(),
-                      ),
-                      (Route<dynamic> route) => false,
-                    );
-                    // await logout(
-                    //   context,
-                    // ); // Función asíncrona que debes implementar
+                    await logout(context, ref);
                   },
                 ).show();
               },
