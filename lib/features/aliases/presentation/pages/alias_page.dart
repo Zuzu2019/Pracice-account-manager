@@ -15,7 +15,7 @@ class AliasPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          loc.aliasManagement,
+          loc.alias_management,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -34,21 +34,20 @@ class AliasPage extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       drawer: const AppDrawer(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+
+      body: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Center(child: ButtonOptionsAliase()),
-            SizedBox(height: 20),
+            const SizedBox(height: 25),
 
-            //SearchBarExample(),
-            SizedBox(child: SearchTableAliases()),
+            Expanded(child: SearchTableAliases()),
           ],
         ),
       ),
       bottomNavigationBar: const Footer(),
-      //floatingActionButton: const ButtonHome(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }

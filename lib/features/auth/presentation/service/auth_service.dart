@@ -2,14 +2,16 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:practice_acount_manager/features/auth/presentation/pages/select_login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
-
 import 'dart:async';
+
+import 'package:practice_acount_manager/features/auth/presentation/pages/select_login_page.dart';
+import 'package:practice_acount_manager/riverpod/auth_provider.dart';
 
 class AuthService {
   final String zitadelUrl;
@@ -18,6 +20,7 @@ class AuthService {
 
   String? _codeVerifier;
   final AppLinks _appLinks = AppLinks();
+  final AuthServiceProvider = Provider<AuthService>((ref) => AuthService());
 
   StreamSubscription? _sub;
 
@@ -147,14 +150,21 @@ class AuthService {
       throw Exception('Error al obtener información del usuario');
     }
   }
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    throw UnimplementedError();
+  }
 }
 
-Future<void> logout(BuildContext context) async {
+Future<void> logout(BuildContext context, WidgetRef ref) async {
   final prefs = await SharedPreferences.getInstance();
   final idToken = prefs.getString('id_token') ?? '';
   const redirectUri = 'com.practiceacountmanager.app://callback';
 
   await prefs.clear();
+  ref.read(authProvider.notifier).clearTokens();
 
   final logoutUrl = Uri.parse(
     'https://adminemail-prueba-ftulnf.us1.zitadel.cloud/oidc/v1/end_session'

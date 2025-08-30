@@ -1,68 +1,53 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:practice_acount_manager/features/users/data/mock_users.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:practice_acount_manager/features/users/presentation/models/users.dart';
-import 'package:practice_acount_manager/features/users/presentation/pages/frm_update_user.dart';
+import 'package:practice_acount_manager/features/users/provider/user_paging_provider.dart';
+import 'package:practice_acount_manager/features/users/provider/user_provider.dart';
 import 'package:practice_acount_manager/features/widgets/generals/search_bar.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
+import 'package:practice_acount_manager/features/users/presentation/pages/frm_update_user.dart';
 
-class SearchTableUser extends StatefulWidget {
+class SearchTableUser extends ConsumerStatefulWidget {
   const SearchTableUser({super.key});
 
   @override
-  State<SearchTableUser> createState() => _SearchTableUserState();
+  ConsumerState<SearchTableUser> createState() => _SearchTableUserState();
 }
 
-class _SearchTableUserState extends State<SearchTableUser> {
-  late UserDataSource _dataSource;
-  bool _initialized = false;
-  final TextEditingController _searchCtrl = TextEditingController();
-
-  // Se ejecuta después de initState y cuando el contexto cambia
+class _SearchTableUserState extends ConsumerState<SearchTableUser> {
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      final loc = AppLocalizations.of(context)!;
-      _dataSource = UserDataSource(
-        users: users,
-        onEdit: _onEdit,
-        onDelete: (user) => _onDelete(user, context),
-        loc: loc,
-      );
-      _initialized = true;
-    }
-  }
-
-  void _onEdit(User u) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => UpdateUserForm(user: u)),
-    );
+  void initState() {
+    super.initState();
+    // Cargar la primera página automáticamente
+    Future.microtask(() => ref.read(usersPagingProvider).fetchNextPage());
   }
 
   void _onDelete(User user, BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+
     AwesomeDialog(
       context: context,
       dialogType: DialogType.question,
+      dismissOnTouchOutside: false,
       animType: AnimType.bottomSlide,
       title: loc.delete,
-      desc: '${user.login} ${loc.delete_confirmation}',
+      desc:
+          '${user.login} '
+          ' ${loc.delete_confirmation}',
       btnCancelText: loc.cancel,
       btnCancelOnPress: () {},
       btnOkText: loc.confirm,
-      btnOkOnPress: () {
-        setState(() {
-          _dataSource.delete(user);
-        });
+      btnOkOnPress: () async {
+        final success = await ref
+            .read(userProvider.notifier)
+            .deleteUser(user.id);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('"${user.login}" ${loc.deleted}'),
-            duration: const Duration(seconds: 3),
-            backgroundColor: Colors.green,
-            elevation: 5,
+            content: Text(success ? '"${user.login}${loc.deleted}"' : 'Error'),
+            backgroundColor: success ? Colors.green : Colors.red,
           ),
         );
       },
@@ -70,39 +55,29 @@ class _SearchTableUserState extends State<SearchTableUser> {
   }
 
   @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Mientras _dataSource no esté listo, muestra un loader
-    if (!_initialized) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
     final loc = AppLocalizations.of(context)!;
+    final manager = ref.watch<UsersPagingManager>(usersPagingProvider);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        children: [
-          SearchBarExample(
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SearchBarExample(
             onQueryChanged: (query) {
-              _dataSource.filter(query);
-              setState(() {});
+              ref.read(usersPagingProvider.notifier).setSearchQuery(query);
+              //ref.read(userProvider.notifier).setSearchQuery(query),
             },
           ),
-          const SizedBox(height: 16),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _dataSource.visibleCount,
-            itemBuilder: (context, index) {
-              final user = _dataSource.getVisibleAt(index);
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 1),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: PagedListView<int, User>(
+            state: manager.state,
+            fetchNextPage: () => manager.fetchNextPage(),
+            builderDelegate: PagedChildBuilderDelegate<User>(
+              itemBuilder: (context, user, index) => Card(
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                 elevation: 4,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
@@ -153,7 +128,6 @@ class _SearchTableUserState extends State<SearchTableUser> {
                                     user.email,
                                     style: const TextStyle(fontSize: 13),
                                   ),
-                                  const SizedBox(height: 12),
                                 ],
                               ),
                             ),
@@ -209,7 +183,7 @@ class _SearchTableUserState extends State<SearchTableUser> {
                                     ),
                                   ),
                                   Text(
-                                    user.quota,
+                                    (user.quota).toString(),
                                     style: const TextStyle(fontSize: 13),
                                   ),
                                 ],
@@ -219,9 +193,16 @@ class _SearchTableUserState extends State<SearchTableUser> {
                         ),
                       ),
                       PopupMenuButton<String>(
-                        onSelected: (value) {
+                        onSelected: (value) async {
                           if (value == 'edit') {
-                            _onEdit(user);
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    UpdateUserForm(user: user),
+                              ),
+                            );
+                            //manager.reset(query: manager.currentQuery);
                           } else if (value == 'delete') {
                             _onDelete(user, context);
                           }
@@ -248,141 +229,22 @@ class _SearchTableUserState extends State<SearchTableUser> {
                             ),
                           ),
                         ],
-                        icon: const Icon(Icons.more_vert),
                       ),
                     ],
                   ),
                 ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class UserDataSource extends DataTableSource {
-  final void Function(User) onEdit;
-  final void Function(User) onDelete;
-  final AppLocalizations loc;
-
-  final List<User> _all;
-  List<User> _visible;
-
-  int get visibleCount => _visible.length;
-  User getVisibleAt(int index) => _visible[index];
-
-  UserDataSource({
-    required List<User> users,
-    required this.onEdit,
-    required this.onDelete,
-    required this.loc,
-  }) : _all = List<User>.from(users),
-       _visible = List<User>.from(users);
-
-  void filter(String query) {
-    final q = query.toLowerCase().trim();
-    if (q.isEmpty) {
-      _visible = List<User>.from(_all);
-    } else {
-      _visible = _all.where((u) {
-        return u.email.toLowerCase().contains(q) ||
-            u.maildir.toLowerCase().contains(q) ||
-            u.identificacion.toLowerCase().contains(q) ||
-            u.grupo.toLowerCase().contains(q) ||
-            u.quota.toLowerCase().contains(q);
-      }).toList();
-    }
-    notifyListeners();
-  }
-
-  void delete(User u) {
-    _all.removeWhere((x) => x.login == u.login);
-    _visible.removeWhere((x) => x.login == u.login);
-    notifyListeners();
-  }
-
-  @override
-  DataRow? getRow(int index) {
-    if (index >= _visible.length) return null;
-    final u = _visible[index];
-
-    final rowColor = index % 2 == 0
-        ? const Color(0xFFE3F2FD)
-        : const Color(0xFFBBDEFB);
-
-    return DataRow.byIndex(
-      index: index,
-      color: WidgetStateProperty.all(rowColor),
-      cells: [
-        DataCell(Text(u.login)),
-        DataCell(Text(u.email)),
-        DataCell(Text(u.maildir)),
-        DataCell(Text(u.identificacion)),
-        DataCell(Text(u.grupo)),
-        DataCell(Text(u.quota)),
-        DataCell(
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'edit') {
-                onEdit(u);
-              } else if (value == 'delete') {
-                onDelete(u);
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.edit,
-                      color: const Color.fromARGB(255, 72, 115, 242),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      loc.edit,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 72, 115, 242),
-                      ),
-                    ),
-                  ],
-                ),
               ),
-              PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    const Icon(Icons.delete, color: Colors.red),
-                    const SizedBox(width: 8),
-                    Text(
-                      loc.delete,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            icon: const Icon(Icons.more_vert),
+              firstPageProgressIndicatorBuilder: (_) =>
+                  const Center(child: CircularProgressIndicator()),
+              newPageProgressIndicatorBuilder: (_) =>
+                  const Center(child: CircularProgressIndicator()),
+              noItemsFoundIndicatorBuilder: (_) =>
+                  const Center(child: CircularProgressIndicator()),
+              //const Center(child: Text('No se encontraron datos')),
+            ),
           ),
         ),
       ],
     );
   }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => _visible.length;
-
-  @override
-  int get selectedRowCount => 0;
 }

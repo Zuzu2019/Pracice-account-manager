@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/frm_add_user.dart';
 import 'package:practice_acount_manager/features/users/presentation/pages/users_page.dart';
+import 'package:practice_acount_manager/features/users/provider/user_provider.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 enum ButtonAction { addUser, listUsers }
 
-class ButtonOptions extends StatefulWidget {
+class ButtonOptions extends ConsumerStatefulWidget {
   //final void Function(Locale) onLocaleChange;
   const ButtonOptions({super.key});
 
   @override
-  State<ButtonOptions> createState() => _ButtonOptionsState();
+  ConsumerState<ButtonOptions> createState() => _ButtonOptionsState();
 }
 
-class _ButtonOptionsState extends State<ButtonOptions> {
+class _ButtonOptionsState extends ConsumerState<ButtonOptions> {
   ButtonAction? selectedAction;
 
   @override
@@ -59,6 +61,7 @@ class _ButtonOptionsState extends State<ButtonOptions> {
                 setState(() {
                   selectedAction = ButtonAction.listUsers;
                 });
+                ref.read(userProvider.notifier).reload();
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => UsersPage()),

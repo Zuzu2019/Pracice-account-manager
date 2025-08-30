@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:practice_acount_manager/features/aliases/models/aliases.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/alias_page.dart';
 import 'package:practice_acount_manager/features/aliases/presentation/pages/frm_add_aliase.dart';
+import 'package:practice_acount_manager/features/aliases/providers/alias_provider.dart';
+import 'package:practice_acount_manager/features/users/provider/user_provider.dart';
 import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 enum ButtonAction { addAliase, listAliase }
 
-class ButtonOptionsAliase extends StatefulWidget {
+class ButtonOptionsAliase extends ConsumerStatefulWidget {
   const ButtonOptionsAliase({super.key});
 
   @override
-  State<ButtonOptionsAliase> createState() => _ButtonOptionsAliaseState();
+  ConsumerState<ButtonOptionsAliase> createState() =>
+      _ButtonOptionsAliaseState();
 }
 
-class _ButtonOptionsAliaseState extends State<ButtonOptionsAliase> {
+class _ButtonOptionsAliaseState extends ConsumerState<ButtonOptionsAliase> {
   ButtonAction? _selectedAction;
 
   @override
@@ -36,14 +40,14 @@ class _ButtonOptionsAliaseState extends State<ButtonOptionsAliase> {
                   context,
                   MaterialPageRoute(
                     builder: (_) => AddAliasForm(
-                      alias: Aliases(local: '', remoto: ''),
+                      alias: Aliases(local: '', remoto: '', id: 0),
                       isEditing: false,
                     ),
                   ),
                 );
               },
               icon: const Icon(Icons.person_add),
-              label: Text(loc.addAlias),
+              label: Text(loc.add_alias),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _selectedAction == ButtonAction.addAliase
                     ? const Color.fromARGB(255, 0, 100, 255)
@@ -60,10 +64,16 @@ class _ButtonOptionsAliaseState extends State<ButtonOptionsAliase> {
               ),
             ),
             ElevatedButton.icon(
-              onPressed: () {
+              onPressed: () async {
                 setState(() {
                   _selectedAction = ButtonAction.listAliase;
                 });
+
+                final manager = ref.read(usersPagingProvider);
+                manager.reset();
+                await manager.fetchNextPage();
+
+                //ref.read(aliasProvider.notifier).reload();
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => AliasPage()),

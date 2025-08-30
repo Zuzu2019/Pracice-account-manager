@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:practice_acount_manager/features/auth/presentation/pages/login_page_local.dart';
-import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
-import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
-import 'package:practice_acount_manager/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+
+import 'package:practice_acount_manager/features/widgets/generals/drawer.dart';
+import 'package:practice_acount_manager/features/widgets/generals/footer.dart';
+import 'package:practice_acount_manager/l10n/app_localizations.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'Home',
+        title: Text(
+          loc.home,
           style: TextStyle(
-            color: Colors.white,
+            color: Color.fromARGB(255, 253, 253, 253),
             fontWeight: FontWeight.bold,
             fontSize: 23,
             letterSpacing: 1.2,

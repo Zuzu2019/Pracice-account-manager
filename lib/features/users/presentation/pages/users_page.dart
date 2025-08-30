@@ -34,7 +34,7 @@ class UsersPage extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       drawer: AppDrawer(),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -42,11 +42,25 @@ class UsersPage extends StatelessWidget {
             Center(child: ButtonOptions()),
             const SizedBox(height: 20),
 
-            //const SearchBarExample(),
-            SizedBox(width: double.infinity, child: const SearchTableUser()),
+            // 🔥 Expandimos el SearchTableUser para que ocupe todo el espacio restante
+            Expanded(child: SearchTableUser()),
           ],
         ),
       ),
+
+      // body: SingleChildScrollView(
+      //   padding: const EdgeInsets.all(16.0),
+      //   child: Column(
+      //     crossAxisAlignment: CrossAxisAlignment.center,
+      //     children: [
+      //       Center(child: ButtonOptions()),
+      //       const SizedBox(height: 20),
+
+      //       //const SearchBarExample(),
+      //       SizedBox(width: double.infinity, child: const SearchTableUser()),
+      //     ],
+      //   ),
+      // ),
       bottomNavigationBar: const Footer(),
       //floatingActionButton: const ButtonHome(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

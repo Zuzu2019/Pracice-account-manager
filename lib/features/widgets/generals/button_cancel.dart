@@ -13,7 +13,7 @@ class ButtonCancel extends StatelessWidget {
       dialogType: DialogType.warning,
       animType: AnimType.topSlide,
       title: loc.cancel,
-      desc: loc.cancelConfirmation,
+      desc: loc.cancel_confirmation,
       btnCancelText: 'No',
       btnOkText: loc.cancel,
       btnCancelOnPress: () {},
